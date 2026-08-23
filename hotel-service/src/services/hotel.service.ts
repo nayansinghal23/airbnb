@@ -1,4 +1,4 @@
-import { createHotel, getAllHotels, getHotelById } from "../repositories/hotel.repository";
+import { createHotel, getAllHotels, getHotelById, softDeleteHotel } from "../repositories/hotel.repository";
 
 import { CreateHotelDTO } from "../dto/hotel.dto";
 
@@ -12,4 +12,8 @@ export async function getHotelByIdService(id: number) {
 
 export async function getAllHotelsService() {
     return getAllHotels();
+}
+
+export async function softDeleteHotelService(hotelId: number) {
+    return softDeleteHotel(hotelId);
 }

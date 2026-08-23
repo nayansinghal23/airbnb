@@ -6,4 +6,5 @@ export const createHotelSchema = z.object({
     location: z.string().min(1),
     rating: z.number().min(0).max(5).optional(),
     ratingCount: z.number().int().min(0).optional(),
+    deletedAt: z.date().optional(),
 });

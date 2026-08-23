@@ -24,6 +24,11 @@ app.use(
   proxy(process.env.BOOKING_SERVICE_URL || "http://localhost:3000")
 );
 
+app.use(
+  '/api/v1/hotel',
+  proxy(process.env.HOTEL_SERVICE_URL || "http://localhost:3001")
+);
+
 app.use(express.json());
 app.use('/api/v1', v1Router);
 

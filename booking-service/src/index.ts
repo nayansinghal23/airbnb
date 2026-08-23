@@ -11,10 +11,10 @@ const port = process.env.PORT || 3000;
 
 app.use(express.json());
 function sendMail() {
-  for(let i = 0; i < 10; i++) addEmailToQueue({
+  addEmailToQueue({
     to: "nayansinghal393@gmail.com",
     subject: "Sample email (Booking service)",
-    templateId: `sample-template-${i}`,
+    templateId: `sample-template`,
     params: {
       name: "Nayan",
       orderId: "12345",

@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 
-import { createHotelService, getHotelByIdService } from '../services/hotel.service';
+import { createHotelService, getAllHotelsService, getHotelByIdService } from '../services/hotel.service';
 
 export async function createHotelHandler(req: Request, res: Response) {
     try {
@@ -54,6 +54,23 @@ export async function getHotelByIdHandler(req: Request, res: Response) {
         return res.status(500).json({
             success: false,
             message: "Failed to fetch hotel",
+        });
+    }
+}
+
+export async function getAllHotelsHandler(req: Request, res: Response) {
+    try {
+        const hotels = await getAllHotelsService();
+
+        return res.status(200).json({
+            success: true,
+            data: hotels,
+            message: "Hotel created successfully",
+        });
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Failed to fetch hotels",
         });
     }
 }

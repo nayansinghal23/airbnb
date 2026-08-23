@@ -13,3 +13,8 @@ export const getHotelById = async (id: number) => {
     });
     return hotel;
 }
+
+export const getAllHotels = async () => {
+    const hotels = await prisma.hotel.findMany();
+    return hotels;
+}

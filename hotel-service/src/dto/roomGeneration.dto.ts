@@ -12,3 +12,8 @@ export interface RoomGenerationResponse {
     errors: string[];
     jobId: string;
 }
+export interface RoomGenerationDTO {
+    roomCategoryId: number;
+    startDate: Date;
+    endDate: Date;
+}

@@ -16,3 +16,9 @@ export const roomGenerationJobSchema = z.object({
     priceOverride: z.number().positive().optional(),
     batchSize: z.number().positive().default(100),
 });
+
+export const roomGenerationTypeSchema = z.object({
+    scheduleType: z.enum(['immediate', 'scheduled'], {
+        message: 'scheduleType query parameter is required',
+    }),
+})

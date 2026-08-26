@@ -6,12 +6,26 @@ import { addRoomsToQueue } from "../producers/roomGeneration.producer";
 
 export async function generateRoomsHandler(req: Request, res: Response) {
     try {
-        // const { totalDatesProcessed, totalRoomsCreated } = await generateRooms(req.body);   
-        addRoomsToQueue(req.body);
-        return res.status(201).json({
-            success: true,
-            message: "Adding rooms might require some time.",
-        });
+        const { scheduleType } = req.query;
+        if(scheduleType === "immediate") {
+            const { totalDatesProcessed, totalRoomsCreated } = await generateRooms(req.body);
+            return res.status(201).json({
+                success: true,
+                data: { totalDatesProcessed, totalRoomsCreated },
+                message: "Adding rooms might require some time.",
+            });
+        } else if(scheduleType === "scheduled") {
+            addRoomsToQueue(req.body);
+            return res.status(201).json({
+                success: true,
+                message: "Adding rooms might require some time.",
+            });
+        } else {
+            return res.status(400).json({
+                success: false,
+                message: "Unsupported scheduleType",
+            });
+        }
     } catch (error) {
         return res.status(500).json({
             success: false,

@@ -5,12 +5,12 @@ import { getAvailableRoomsHandler, updateBookingIdToRoomsHandler } from "../cont
 
 import { validateBody, validateQuery } from "../middlewares/validate.middleware";
 
-import { roomGenerationJobSchema } from "../validators/roomGeneration.validator";
+import { roomGenerationJobSchema, roomGenerationTypeSchema } from "../validators/roomGeneration.validator";
 import { getAvailableRoomsSchema, updateBookingIdToRoomsSchema } from "../validators/room.validator";
 
 const roomGenerationRouter = express.Router();
 
-roomGenerationRouter.post('/', validateBody(roomGenerationJobSchema), generateRoomsHandler)
+roomGenerationRouter.post('/', validateBody(roomGenerationJobSchema), validateQuery(roomGenerationTypeSchema), generateRoomsHandler)
 roomGenerationRouter.get('/available', validateQuery(getAvailableRoomsSchema), getAvailableRoomsHandler)
 roomGenerationRouter.post('/update-booking-id', validateBody(updateBookingIdToRoomsSchema), updateBookingIdToRoomsHandler)
 

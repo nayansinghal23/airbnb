@@ -2,10 +2,10 @@ import axios from "axios";
 
 const HOTEL_SERVICE_URL = 'http://localhost:3001/api/v1';
 
-export async function getAvailableRooms(roomCategoryId: number, checkInDate: Date, checkOutDate: Date) {
+export async function getAvailableRooms(roomCategoryId: number, hotelId: number, checkInDate: Date, checkOutDate: Date) {
     const response = await axios.get(`${HOTEL_SERVICE_URL}/room/available`, {
         params: {
-            roomCategoryId, checkInDate, checkOutDate,
+            roomCategoryId, hotelId, checkInDate, checkOutDate,
         }
     });
     return response.data.data;

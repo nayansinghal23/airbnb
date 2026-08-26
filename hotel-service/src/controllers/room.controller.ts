@@ -16,8 +16,8 @@ export async function getAvailableRoomsHandler(req: Request, res: Response) {
             });
         }
 
-        const { roomCategoryId, checkInDate, checkOutDate } = result.data;
-        const rooms = await getAvailableRoomsService({ checkInDate, checkOutDate, roomCategoryId });
+        const { roomCategoryId, hotelId, checkInDate, checkOutDate } = result.data;
+        const rooms = await getAvailableRoomsService({ checkInDate, checkOutDate, roomCategoryId, hotelId });
         return res.status(200).json({
             success: true,
             data: rooms,

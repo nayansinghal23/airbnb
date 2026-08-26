@@ -4,8 +4,15 @@ import { confirmBookingService, createBookingService } from '../services/booking
 
 export const createBookingController = async (req: Request, res: Response) => {
     try {
-        const booking = await createBookingService(req.body);
-    
+        const cookie = req.headers.cookie, userId = req.headers['x-user-id'];
+        if(!cookie || !cookie.includes("access_token") || !userId) {
+            return res.status(401).json({
+                success: false,
+                message: "User is not authenticated",
+            })
+        }
+        
+        const booking = await createBookingService({ ...req.body, userId: Number(userId) });
         if(!booking) {
             return res.status(400).json({
                 success: false,

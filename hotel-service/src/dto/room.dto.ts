@@ -1,5 +1,6 @@
 export interface GetAvailableRoomsDTO {
     roomCategoryId: number;
+    hotelId: number;
     checkInDate: Date;
     checkOutDate: Date;
 }

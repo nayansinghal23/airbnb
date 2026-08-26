@@ -18,6 +18,7 @@ export async function createBookingService(dto: CreateBookingDTO) {
     try {
         const availableRooms = await getAvailableRooms(
             dto.roomCategoryId,
+            dto.hotelId,
             dto.checkInDate,
             dto.checkOutDate,
         );

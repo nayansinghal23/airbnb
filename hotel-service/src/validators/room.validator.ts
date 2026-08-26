@@ -5,6 +5,11 @@ export const getAvailableRoomsSchema = z.object({
       .number({ message: "Room category id must be present" })
       .int("Room category id must be an integer")
       .positive("Room category id must be positive"),
+
+    hotelId: z.coerce
+      .number({ message: "Hotel id must be present" })
+      .int("Hotel id must be an integer")
+      .positive("Hotel id must be positive"),
   
     checkInDate: z.coerce.date({
       message: "Invalid check-in date",

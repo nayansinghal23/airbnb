@@ -69,6 +69,7 @@ export async function findByRoomCategoryIdAndDateRange(dto: GetAvailableRoomsDTO
                 lte: dto.checkOutDate,
             },
             deletedAt: null,
+            hotelId: dto.hotelId,
         }
     })
 }

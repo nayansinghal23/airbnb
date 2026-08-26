@@ -26,3 +26,38 @@ model Hotel {
 
   @@map("hotels")
 }
+
+enum RoomType {
+  SINGLE
+  DOUBLE
+  FAMILY
+  DELUXE
+  SUITE
+}
+
+model RoomCategory {
+  id         Int       @id @default(autoincrement())
+  hotelId    Int
+  price      Int
+  roomType   RoomType
+  roomCount  Int
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  deletedAt  DateTime?
+
+  @@map("room_categories")
+}
+
+model Room {
+  id                Int       @id @default(autoincrement())
+  hotelId           Int
+  roomCategoryId    Int
+  dateOfAvailability DateTime
+  price             Int
+  bookingId         Int?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  deletedAt         DateTime?
+
+  @@map("rooms")
+}

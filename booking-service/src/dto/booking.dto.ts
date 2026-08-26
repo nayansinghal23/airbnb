@@ -3,4 +3,7 @@ export interface CreateBookingDTO {
     hotelId: number
     totalGuests: number
     amount: number
+    checkInDate: Date
+    checkOutDate: Date
+    roomCategoryId: number
 };

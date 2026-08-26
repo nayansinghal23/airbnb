@@ -6,7 +6,10 @@ export const createBookingController = async (req: Request, res: Response) => {
     const booking = await createBookingService(req.body);
 
     if(!booking) {
-        throw new Error("Unable to create a booking");
+        return res.status(400).json({
+            success: false,
+            message: "Unable to create a booking"
+        })
     }
 
     res.status(201).json({

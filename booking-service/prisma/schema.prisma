@@ -19,6 +19,7 @@ model Booking {
   hotelId           Int
   checkInDate       DateTime
   checkOutDate      DateTime
+  roomCategoryId    Int
   createdAt         DateTime        @default(now())
   updatedAt         DateTime        @updatedAt
   amount            Int

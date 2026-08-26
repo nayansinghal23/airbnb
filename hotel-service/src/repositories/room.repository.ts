@@ -1,5 +1,7 @@
 import { prisma } from "../lib/prisma";
 
+import { GetAvailableRoomsDTO, UpdateBookingIdToRoomsDTO } from "../dto/room.dto";
+
 export async function findByRoomCategoryIdAndDate(id: number, startDate: Date, endDate: Date) {
     return await prisma.room.findMany({
         where: {
@@ -55,4 +57,27 @@ export async function findLatestDatesForAllCategories(): Promise<Array<{roomCate
             roomCategoryId: result.roomCategoryId,
             latestDate: result._max.dateOfAvailability!,
     }));
+}
+
+export async function findByRoomCategoryIdAndDateRange(dto: GetAvailableRoomsDTO) {
+    return await prisma.room.findMany({
+        where: {
+            roomCategoryId: dto.roomCategoryId,
+            bookingId: null,
+            dateOfAvailability: {
+                gte: dto.checkInDate,
+                lte: dto.checkOutDate,
+            },
+            deletedAt: null,
+        }
+    })
+}
+
+export async function updateBookingIdToRooms(dto: UpdateBookingIdToRoomsDTO) {
+    return prisma.room.updateMany({
+        where: {
+            id: { in: dto.roomIds },
+        },
+        data: { bookingId: dto.bookingId },
+    })
 }

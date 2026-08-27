@@ -114,3 +114,15 @@ export const getUserProfileController = async (req: Request, res: Response) => {
         });
     }
 }
+
+export const logOutController = async (req: Request, res: Response) => {
+    res.clearCookie("access_token", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+    });
+
+    return res.status(200).json({
+        success: true,
+        message: "Logged out successfully",
+    });
+}

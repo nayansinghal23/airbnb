@@ -5,6 +5,7 @@ import { generateJWTToken } from '../utils/generateJWTToken';
 import { verifyPassword } from '../utils/verifyPassword';
 
 import { createUserService, getUserProfile, loginService } from '../services/user.service';
+import { assignUserRole } from '../services/roles.service';
 
 export const createUserController = async (req: Request, res: Response) => {
     try {
@@ -14,9 +15,17 @@ export const createUserController = async (req: Request, res: Response) => {
                 message: "Unable to generate token"
             });
         }
+
+        const existingUser = await loginService(req.body.email);
+        if(existingUser) {
+            return res.status(400).json({
+                message: "User with this mail already exists"
+            });
+        }
     
         const user = await createUserService({
-            ...req.body,
+            username: req.body.username,
+            email: req.body.email,
             password: hashedPassword,
         });
     
@@ -25,6 +34,9 @@ export const createUserController = async (req: Request, res: Response) => {
                 message: "Unable to create a user"
             });
         }
+        
+        const role = req.body.role;
+        await assignUserRole(user.id, role === "admin" ? 1 : 2);
     
         const token = generateJWTToken(user.id, user.email);
         res.cookie("access_token", token, {

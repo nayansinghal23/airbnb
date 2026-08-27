@@ -4,8 +4,18 @@ import Modal from '../components/ui/Modal'
 import LoginForm from '../components/auth/LoginForm'
 import RegisterForm from '../components/auth/RegisterForm'
 import { registerUser } from '../lib/authApi'
+import { useToast } from './ToastContext'
 
 type DialogType = 'login' | 'register' | null
+
+/** Pull a human-readable message out of an API response body, if present. */
+function messageFrom(data: unknown, fallback: string): string {
+  if (data && typeof data === 'object' && 'message' in data) {
+    const m = (data as { message?: unknown }).message
+    if (typeof m === 'string' && m.trim()) return m
+  }
+  return fallback
+}
 
 interface AuthDialogContextValue {
   openLogin: () => void
@@ -27,6 +37,7 @@ export function useAuthDialog(): AuthDialogContextValue {
  */
 export function AuthDialogProvider({ children }: { children: ReactNode }) {
   const [dialog, setDialog] = useState<DialogType>(null)
+  const { showToast } = useToast()
 
   const openLogin = useCallback(() => setDialog('login'), [])
   const openRegister = useCallback(() => setDialog('register'), [])
@@ -59,15 +70,27 @@ export function AuthDialogProvider({ children }: { children: ReactNode }) {
                   `[register] success (status ${result.status}) →`,
                   result.data,
                 )
+                showToast(
+                  'success',
+                  messageFrom(result.data, 'Account created successfully!'),
+                )
                 close()
               } else {
                 console.warn(
                   `[register] failed (status ${result.status}) →`,
                   result.data,
                 )
+                showToast(
+                  'error',
+                  messageFrom(result.data, `Registration failed (status ${result.status}).`),
+                )
               }
             } catch (err) {
               console.error('[register] network/request error →', err)
+              showToast(
+                'error',
+                'Could not reach the server. Please try again.',
+              )
             }
           }}
         />

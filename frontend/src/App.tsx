@@ -4,9 +4,11 @@ import Features from './components/Features'
 import CtaSection from './components/CtaSection'
 import Footer from './components/Footer'
 import { AuthDialogProvider } from './context/AuthDialogContext'
+import { ToastProvider } from './context/ToastContext'
 
 function App() {
   return (
+    <ToastProvider>
     <AuthDialogProvider>
     <div className="flex min-h-screen flex-col bg-white text-slate-900">
       <a
@@ -27,6 +29,7 @@ function App() {
       <Footer />
     </div>
     </AuthDialogProvider>
+    </ToastProvider>
   )
 }
 

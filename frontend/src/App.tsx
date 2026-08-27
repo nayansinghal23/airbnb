@@ -1,15 +1,28 @@
+import Navbar from './components/Navbar'
+import Hero from './components/Hero'
+import Features from './components/Features'
+import CtaSection from './components/CtaSection'
+import Footer from './components/Footer'
+
 function App() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-rose-50 to-slate-100">
-      <div className="text-center p-10 rounded-2xl bg-white shadow-xl border border-slate-200">
-        <h1 className="text-4xl font-bold text-rose-600">Vite + React + TS</h1>
-        <p className="mt-3 text-slate-600">
-          Tailwind CSS is wired up and ready.
-        </p>
-        <p className="mt-6 text-sm text-slate-400">
-          Edit <code className="px-1 py-0.5 rounded bg-slate-100 text-slate-700">src/App.tsx</code> to get started.
-        </p>
-      </div>
+    <div className="flex min-h-screen flex-col bg-white text-slate-900">
+      <a
+        href="#main"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-20 focus:rounded-lg focus:bg-rose-600 focus:px-4 focus:py-2 focus:text-white"
+      >
+        Skip to main content
+      </a>
+
+      <Navbar />
+
+      <main id="main" className="flex-1">
+        <Hero />
+        <Features />
+        <CtaSection />
+      </main>
+
+      <Footer />
     </div>
   )
 }

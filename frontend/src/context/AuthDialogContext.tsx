@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import Modal from '../components/ui/Modal'
 import LoginForm from '../components/auth/LoginForm'
 import RegisterForm from '../components/auth/RegisterForm'
+import { registerUser } from '../lib/authApi'
 
 type DialogType = 'login' | 'register' | null
 
@@ -49,10 +50,25 @@ export function AuthDialogProvider({ children }: { children: ReactNode }) {
 
       <Modal isOpen={dialog === 'register'} onClose={close} title="Create your account">
         <RegisterForm
-          onSuccess={(values) => {
-            // No API yet — wire up the register request here later.
-            console.log('register submit', values)
-            close()
+          onSuccess={async (values) => {
+            console.log('[register] submitting →', values)
+            try {
+              const result = await registerUser(values)
+              if (result.ok) {
+                console.log(
+                  `[register] success (status ${result.status}) →`,
+                  result.data,
+                )
+                close()
+              } else {
+                console.warn(
+                  `[register] failed (status ${result.status}) →`,
+                  result.data,
+                )
+              }
+            } catch (err) {
+              console.error('[register] network/request error →', err)
+            }
           }}
         />
       </Modal>

@@ -36,7 +36,7 @@ function validate(values: RegisterValues): Errors {
 }
 
 interface RegisterFormProps {
-  onSuccess: (values: RegisterValues) => void
+  onSuccess: (values: RegisterValues) => void | Promise<void>
 }
 
 /**
@@ -46,17 +46,25 @@ interface RegisterFormProps {
 export default function RegisterForm({ onSuccess }: RegisterFormProps) {
   const [values, setValues] = useState<RegisterValues>(initial)
   const [errors, setErrors] = useState<Errors>({})
+  const [submitting, setSubmitting] = useState(false)
 
   function update(field: keyof RegisterValues, value: string) {
     setValues((v) => ({ ...v, [field]: value }))
     if (errors[field]) setErrors((e) => ({ ...e, [field]: '' }))
   }
 
-  function onSubmit(e: FormEvent<HTMLFormElement>) {
+  async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
     const nextErrors = validate(values)
     setErrors(nextErrors)
-    if (isValid(nextErrors as Record<string, string>)) onSuccess(values)
+    if (!isValid(nextErrors as Record<string, string>)) return
+
+    setSubmitting(true)
+    try {
+      await onSuccess(values)
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   return (
@@ -124,8 +132,8 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
         )}
       </FormField>
 
-      <Button type="submit" size="lg" className="w-full">
-        Create account
+      <Button type="submit" size="lg" className="w-full" disabled={submitting}>
+        {submitting ? 'Creating account…' : 'Create account'}
       </Button>
     </form>
   )

@@ -1,9 +1,12 @@
 import Button from './ui/Button'
 import Container from './ui/Container'
 import Logo from './ui/Logo'
+import { useAuthDialog } from '../context/AuthDialogContext'
 
 /** Top navigation with brand and auth actions. */
 export default function Navbar() {
+  const { openLogin, openRegister } = useAuthDialog()
+
   return (
     <header className="sticky top-0 z-10 border-b border-slate-200 bg-white/80 backdrop-blur">
       <Container>
@@ -20,10 +23,10 @@ export default function Navbar() {
           </a>
 
           <div className="flex items-center gap-2 sm:gap-3">
-            <Button href="/login" variant="ghost" size="sm">
+            <Button onClick={openLogin} variant="ghost" size="sm">
               Log in
             </Button>
-            <Button href="/register" variant="primary" size="sm">
+            <Button onClick={openRegister} variant="primary" size="sm">
               Register
             </Button>
           </div>

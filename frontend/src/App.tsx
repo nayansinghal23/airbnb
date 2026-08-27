@@ -3,9 +3,11 @@ import Hero from './components/Hero'
 import Features from './components/Features'
 import CtaSection from './components/CtaSection'
 import Footer from './components/Footer'
+import { AuthDialogProvider } from './context/AuthDialogContext'
 
 function App() {
   return (
+    <AuthDialogProvider>
     <div className="flex min-h-screen flex-col bg-white text-slate-900">
       <a
         href="#main"
@@ -24,6 +26,7 @@ function App() {
 
       <Footer />
     </div>
+    </AuthDialogProvider>
   )
 }
 

@@ -1,8 +1,11 @@
 import Button from './ui/Button'
 import Container from './ui/Container'
+import { useAuthDialog } from '../context/AuthDialogContext'
 
 /** Primary above-the-fold section: value proposition + main auth call to action. */
 export default function Hero() {
+  const { openLogin, openRegister } = useAuthDialog()
+
   return (
     <section className="bg-gradient-to-b from-rose-50 to-white">
       <Container className="py-16 sm:py-24 lg:py-32">
@@ -22,10 +25,15 @@ export default function Hero() {
           </p>
 
           <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <Button href="/register" size="lg" className="w-full sm:w-auto">
+            <Button onClick={openRegister} size="lg" className="w-full sm:w-auto">
               Get started — it&apos;s free
             </Button>
-            <Button href="/login" variant="secondary" size="lg" className="w-full sm:w-auto">
+            <Button
+              onClick={openLogin}
+              variant="secondary"
+              size="lg"
+              className="w-full sm:w-auto"
+            >
               Log in to your account
             </Button>
           </div>

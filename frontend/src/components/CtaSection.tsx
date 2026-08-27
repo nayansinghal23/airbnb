@@ -1,8 +1,11 @@
 import Button from './ui/Button'
 import Container from './ui/Container'
+import { useAuthDialog } from '../context/AuthDialogContext'
 
 /** Closing call-to-action band nudging visitors to log in or register. */
 export default function CtaSection() {
+  const { openLogin, openRegister } = useAuthDialog()
+
   return (
     <section className="bg-slate-900">
       <Container className="py-16 sm:py-20">
@@ -14,11 +17,11 @@ export default function CtaSection() {
             Join StayEase today and reserve your room in just a few clicks.
           </p>
           <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <Button href="/register" size="lg" className="w-full sm:w-auto">
+            <Button onClick={openRegister} size="lg" className="w-full sm:w-auto">
               Create an account
             </Button>
             <Button
-              href="/login"
+              onClick={openLogin}
               variant="secondary"
               size="lg"
               className="w-full sm:w-auto"

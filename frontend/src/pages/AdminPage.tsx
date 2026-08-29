@@ -2,11 +2,24 @@ import { useNavigate } from 'react-router-dom'
 import Button from '../components/ui/Button'
 import Container from '../components/ui/Container'
 import Logo from '../components/ui/Logo'
+import CreateHotelForm from '../components/hotel/CreateHotelForm'
 import { useAuth } from '../context/AuthContext'
+import { useToast } from '../context/ToastContext'
+import { createHotel } from '../lib/hotelApi'
+
+/** Extract a human-readable message from an API response body, if present. */
+function messageFrom(data: unknown, fallback: string): string {
+  if (data && typeof data === 'object' && 'message' in data) {
+    const m = (data as { message?: unknown }).message
+    if (typeof m === 'string' && m.trim()) return m
+  }
+  return fallback
+}
 
 /** Admin dashboard. Access is guarded by RequireAdmin in the router. */
 export default function AdminPage() {
   const { user, logout } = useAuth()
+  const { showToast } = useToast()
   const navigate = useNavigate()
 
   function handleLogout() {
@@ -41,6 +54,57 @@ export default function AdminPage() {
           <p className="mt-2 max-w-2xl text-slate-600">
             Welcome back. You are signed in as an administrator of StayEase.
           </p>
+
+          <section
+            aria-labelledby="add-hotel-heading"
+            className="mt-8 max-w-xl rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8"
+          >
+            <h2 id="add-hotel-heading" className="text-xl font-semibold text-slate-900">
+              Add a hotel
+            </h2>
+            <p className="mt-1 text-sm text-slate-600">
+              Create a new hotel listing. All fields are required.
+            </p>
+
+            <div className="mt-6">
+              <CreateHotelForm
+                onSubmit={async (values) => {
+                  console.log('[hotel] creating →', values)
+                  try {
+                    const result = await createHotel(values)
+                    if (result.ok) {
+                      console.log(
+                        `[hotel] created (status ${result.status}) →`,
+                        result.data,
+                      )
+                      showToast(
+                        'success',
+                        messageFrom(result.data, `Hotel "${values.name}" created.`),
+                      )
+                    } else {
+                      console.warn(
+                        `[hotel] failed (status ${result.status}) →`,
+                        result.data,
+                      )
+                      showToast(
+                        'error',
+                        messageFrom(
+                          result.data,
+                          `Could not create hotel (status ${result.status}).`,
+                        ),
+                      )
+                      // Rethrow so the form keeps the entered values for retry.
+                      throw new Error('create hotel failed')
+                    }
+                  } catch (err) {
+                    console.error('[hotel] request error →', err)
+                    showToast('error', 'Could not reach the server. Please try again.')
+                    throw err
+                  }
+                }}
+              />
+            </div>
+          </section>
         </Container>
       </main>
     </div>

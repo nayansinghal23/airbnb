@@ -4,7 +4,7 @@ import { encryptPassword } from '../utils/encryptPassword';
 import { generateJWTToken } from '../utils/generateJWTToken';
 import { verifyPassword } from '../utils/verifyPassword';
 
-import { createUserService, getUserProfile, loginService } from '../services/user.service';
+import { createUserService, fetchUserRoles, getUserProfile, loginService } from '../services/user.service';
 import { assignUserRole } from '../services/roles.service';
 
 export const createUserController = async (req: Request, res: Response) => {
@@ -78,7 +78,9 @@ export const loginController = async (req: Request, res: Response) => {
             secure: process.env.NODE_ENV === "production",
             maxAge: 60 * 60 * 1000,
         }).status(200).json({
-            message: "Login successfull"
+            message: "Login successfull",
+            token,
+            userId: user.id,
         });
     } catch (error) {
         return res.status(500).json({
@@ -137,4 +139,42 @@ export const logOutController = async (req: Request, res: Response) => {
         success: true,
         message: "Logged out successfully",
     });
+}
+
+export const getUserRoles = async (req: Request, res: Response) => {
+    const userId = req.params.userId;
+    if(!userId) {
+        return res.status(404).json({
+            message: "User not found"
+        });
+    }
+
+    const id = Number(userId);
+    if(Number.isNaN(id)) {
+        return res.status(400).json({
+            success: false,
+            message: "Invalid user ID",
+        });
+    }
+
+    try {
+        const roles = await fetchUserRoles(id);
+        if(roles.length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: "No role assigned to user",
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            role: roles[0].name,
+            message: "User roles fetched successfully",
+        });
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Failed to fetch user roles",
+        });
+    }
 }

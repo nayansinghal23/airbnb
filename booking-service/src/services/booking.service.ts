@@ -5,6 +5,7 @@ import {
     createBooking, 
     createIdempotencyKey,
     finalizeIdempotencyKey,
+    getBookingsForUserId,
     getIdempotencyKeyWithLock
 } from '../repositories/booking.repository';
 import { generateIdempotencyKey } from '../utils/generateIdempotencyKey';
@@ -70,4 +71,8 @@ export async function confirmBookingService(key: string) {
         const booking = await changeBookingStatus(tx, idempotencyKey.bookingId, $Enums.BookingStatus.CONFIRMED);
         return booking;
     });
+}
+
+export async function getBookingsForUserIdService(userId: number) {
+    return getBookingsForUserId(userId);
 }

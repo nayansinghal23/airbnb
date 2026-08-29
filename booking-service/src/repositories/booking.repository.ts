@@ -74,3 +74,9 @@ export async function finalizeIdempotencyKey(tx: Prisma.TransactionClient, idemK
     });
     return idempotencyKey;
 }
+
+export async function getBookingsForUserId(userId: number) {
+    return prisma.booking.findMany({
+        where: { userId }
+    });
+}

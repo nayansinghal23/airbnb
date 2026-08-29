@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 
-import { confirmBookingService, createBookingService } from '../services/booking.service';
+import { confirmBookingService, createBookingService, getBookingsForUserIdService } from '../services/booking.service';
 
 export const createBookingController = async (req: Request, res: Response) => {
     try {
@@ -50,6 +50,29 @@ export const confrimBookingController = async (req: Request, res: Response) => {
         return res.status(500).json({
             success: false,
             message: "Failed to confirm booking",
+        });
+    }
+}
+
+export const getBookingsForUserIdController = async (req: Request, res: Response) => {
+    const userId = Number(req.params.userId);
+        if(!userId || Number.isNaN(userId)) {
+            return res.status(401).json({
+                success: false,
+                message: "User not found",
+            })
+        }
+    try {
+        const bookings = await getBookingsForUserIdService(userId);
+        res.status(200).json({
+            success: true,
+            data: bookings,
+            message: `Bookings for user id ${userId}`,
+        });
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Failed to find bookings",
         });
     }
 }

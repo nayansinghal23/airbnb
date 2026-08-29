@@ -21,6 +21,13 @@ export const getAllHotels = async () => {
     return hotels;
 }
 
+export const fetchHotelsByOwnerId = async (ownerId: number) => {
+    const hotels = await prisma.hotel.findMany({
+        where: { deletedAt: null, ownerId },
+    });
+    return hotels;
+}
+
 export const softDeleteHotel = async (id: number) => {
     const hotel = await prisma.hotel.update({
         where: { id },

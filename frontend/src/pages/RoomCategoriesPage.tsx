@@ -4,9 +4,13 @@ import Button from '../components/ui/Button'
 import Container from '../components/ui/Container'
 import Logo from '../components/ui/Logo'
 import RoomCategoryList from '../components/hotel/RoomCategoryList'
+import Modal from '../components/ui/Modal'
+import AddRoomsForm from '../components/room/AddRoomsForm'
 import { useAuth } from '../context/AuthContext'
+import { useToast } from '../context/ToastContext'
 import { listRoomCategories } from '../lib/hotelApi'
 import type { RoomCategory } from '../lib/hotelApi'
+import { addRooms } from '../lib/roomApi'
 
 /** Extract a human-readable message from an API response body, if present. */
 function messageFrom(data: unknown, fallback: string): string {
@@ -21,11 +25,13 @@ function messageFrom(data: unknown, fallback: string): string {
 export default function RoomCategoriesPage() {
   const { hotelId } = useParams<{ hotelId: string }>()
   const { logout } = useAuth()
+  const { showToast } = useToast()
   const navigate = useNavigate()
 
   const [categories, setCategories] = useState<RoomCategory[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [addForCategory, setAddForCategory] = useState<RoomCategory | null>(null)
 
   const numericHotelId = Number(hotelId)
   const validHotelId = Number.isInteger(numericHotelId) && numericHotelId > 0
@@ -122,11 +128,57 @@ export default function RoomCategoriesPage() {
             </div>
 
             <div className="mt-6">
-              <RoomCategoryList categories={categories} loading={loading} error={error} />
+              <RoomCategoryList
+                categories={categories}
+                loading={loading}
+                error={error}
+                onAddRooms={(category) => setAddForCategory(category)}
+              />
             </div>
           </section>
         </Container>
       </main>
+
+      <Modal
+        isOpen={addForCategory !== null}
+        onClose={() => setAddForCategory(null)}
+        title="Add rooms"
+      >
+        {addForCategory && (
+          <AddRoomsForm
+            category={addForCategory}
+            onSubmit={async ({ startDate, endDate, scheduleType }) => {
+              console.log('[room] adding →', {
+                roomCategoryId: addForCategory.id,
+                startDate,
+                endDate,
+                scheduleType,
+              })
+              try {
+                const result = await addRooms(scheduleType, {
+                  roomCategoryId: addForCategory.id,
+                  startDate,
+                  endDate,
+                })
+                if (result.ok) {
+                  showToast('success', messageFrom(result.data, 'Rooms added successfully.'))
+                  setAddForCategory(null)
+                  void load() // refresh counts
+                } else {
+                  // Keep the modal open so the user can adjust and retry.
+                  showToast(
+                    'error',
+                    messageFrom(result.data, `Could not add rooms (status ${result.status}).`),
+                  )
+                }
+              } catch (err) {
+                console.error('[room] request error →', err)
+                showToast('error', 'Could not reach the server. Please try again.')
+              }
+            }}
+          />
+        )}
+      </Modal>
     </div>
   )
 }

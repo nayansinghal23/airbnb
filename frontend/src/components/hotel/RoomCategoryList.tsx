@@ -4,6 +4,8 @@ interface RoomCategoryListProps {
   categories: RoomCategory[]
   loading: boolean
   error: string | null
+  /** Optional handler; when provided each row gets an "Add rooms" action. */
+  onAddRooms?: (category: RoomCategory) => void
 }
 
 const priceFormatter = new Intl.NumberFormat('en-IN', {
@@ -21,6 +23,7 @@ export default function RoomCategoryList({
   categories,
   loading,
   error,
+  onAddRooms,
 }: RoomCategoryListProps) {
   if (loading) {
     return (
@@ -61,6 +64,11 @@ export default function RoomCategoryList({
             <th scope="col" className="px-4 py-3 text-right font-medium">
               Rooms
             </th>
+            {onAddRooms && (
+              <th scope="col" className="px-4 py-3 text-right font-medium">
+                <span className="sr-only">Actions</span>
+              </th>
+            )}
           </tr>
         </thead>
         <tbody className="divide-y divide-slate-200">
@@ -77,6 +85,18 @@ export default function RoomCategoryList({
               <td className="px-4 py-3 text-right tabular-nums text-slate-700">
                 {category.roomCount}
               </td>
+              {onAddRooms && (
+                <td className="px-4 py-3 text-right">
+                  <button
+                    type="button"
+                    onClick={() => onAddRooms(category)}
+                    aria-label={`Add rooms to ${titleCase(category.roomType)} category`}
+                    className="inline-flex items-center rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-2"
+                  >
+                    Add rooms
+                  </button>
+                </td>
+              )}
             </tr>
           ))}
         </tbody>

@@ -12,7 +12,7 @@ export async function generateRoomsHandler(req: Request, res: Response) {
             return res.status(201).json({
                 success: true,
                 data: { totalDatesProcessed, totalRoomsCreated },
-                message: "Adding rooms might require some time.",
+                message: "Rooms added immediately.",
             });
         } else if(scheduleType === "scheduled") {
             addRoomsToQueue(req.body);

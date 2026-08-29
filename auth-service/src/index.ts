@@ -54,6 +54,11 @@ app.use(
   fetchAllRolesMiddleware('admin'),
   proxy(process.env.HOTEL_SERVICE_URL || "http://localhost:3001"),
 );
+app.use(
+  '/api/v1/room',
+  fetchAllRolesMiddleware('admin'),
+  proxy(process.env.HOTEL_SERVICE_URL || "http://localhost:3001"),
+);
 
 app.use(express.json());
 app.use('/api/v1', v1Router);

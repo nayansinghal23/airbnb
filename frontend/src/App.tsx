@@ -1,6 +1,7 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import LandingPage from './pages/LandingPage'
 import AdminPage from './pages/AdminPage'
+import RoomCategoriesPage from './pages/RoomCategoriesPage'
 import RequireAdmin from './components/RequireAdmin'
 import { AuthProvider } from './context/AuthContext'
 import { AuthDialogProvider } from './context/AuthDialogContext'
@@ -19,6 +20,14 @@ function App() {
                 element={
                   <RequireAdmin>
                     <AdminPage />
+                  </RequireAdmin>
+                }
+              />
+              <Route
+                path="/admin/hotels/:hotelId/room-categories"
+                element={
+                  <RequireAdmin>
+                    <RoomCategoriesPage />
                   </RequireAdmin>
                 }
               />

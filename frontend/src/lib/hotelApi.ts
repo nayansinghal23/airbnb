@@ -43,3 +43,32 @@ export function listHotelsByOwner(
 ): Promise<ApiResult<HotelsResponse>> {
   return apiGet<HotelsResponse>(`/hotel/owner/${ownerId}`)
 }
+
+export type RoomType = 'SINGLE' | 'DOUBLE' | 'FAMILY' | 'DELUXE' | 'SUITE'
+
+export interface RoomCategory {
+  id: number
+  hotelId: number
+  price: number
+  roomType: RoomType
+  roomCount: number
+  createdAt: string
+  updatedAt: string
+  deletedAt: string | null
+}
+
+interface RoomCategoriesResponse {
+  success: boolean
+  data: RoomCategory[]
+  message: string
+}
+
+/**
+ * GET a hotel's room categories from
+ * `${API_BASE}/hotel/:hotelId/room-categories`.
+ */
+export function listRoomCategories(
+  hotelId: number,
+): Promise<ApiResult<RoomCategoriesResponse>> {
+  return apiGet<RoomCategoriesResponse>(`/hotel/${hotelId}/room-categories`)
+}

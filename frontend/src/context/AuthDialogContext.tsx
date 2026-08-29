@@ -3,7 +3,7 @@ import type { ReactNode } from 'react'
 import Modal from '../components/ui/Modal'
 import LoginForm from '../components/auth/LoginForm'
 import RegisterForm from '../components/auth/RegisterForm'
-import { registerUser } from '../lib/authApi'
+import { loginUser, registerUser } from '../lib/authApi'
 import { useToast } from './ToastContext'
 
 type DialogType = 'login' | 'register' | null
@@ -51,10 +51,23 @@ export function AuthDialogProvider({ children }: { children: ReactNode }) {
 
       <Modal isOpen={dialog === 'login'} onClose={close} title="Log in to StayEase">
         <LoginForm
-          onSuccess={(values) => {
-            // No API yet — wire up the login request here later.
-            console.log('login submit', values)
-            close()
+          onSuccess={async (values) => {
+            console.log('[login] submitting →', values)
+            try {
+              const result = await loginUser(values)
+              if (result.ok) {
+                showToast('success', messageFrom(result.data, 'Logged in successfully!'))
+                close()
+              } else {
+                showToast(
+                  'error',
+                  messageFrom(result.data, `Login failed (status ${result.status}).`),
+                )
+              }
+            } catch (err) {
+              console.error('[login] network/request error →', err)
+              showToast('error', 'Could not reach the server. Please try again.')
+            }
           }}
         />
       </Modal>

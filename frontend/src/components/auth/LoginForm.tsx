@@ -22,24 +22,32 @@ function validate(values: LoginValues): Errors {
 }
 
 interface LoginFormProps {
-  onSuccess: (values: LoginValues) => void
+  onSuccess: (values: LoginValues) => void | Promise<void>
 }
 
-/** Login form: email + password, all required, validated client-side. No API yet. */
+/** Login form: email + password, all required, validated client-side. */
 export default function LoginForm({ onSuccess }: LoginFormProps) {
   const [values, setValues] = useState<LoginValues>(initial)
   const [errors, setErrors] = useState<Errors>({})
+  const [submitting, setSubmitting] = useState(false)
 
   function update(field: keyof LoginValues, value: string) {
     setValues((v) => ({ ...v, [field]: value }))
     if (errors[field]) setErrors((e) => ({ ...e, [field]: '' }))
   }
 
-  function onSubmit(e: FormEvent<HTMLFormElement>) {
+  async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
     const nextErrors = validate(values)
     setErrors(nextErrors)
-    if (isValid(nextErrors as Record<string, string>)) onSuccess(values)
+    if (!isValid(nextErrors as Record<string, string>)) return
+
+    setSubmitting(true)
+    try {
+      await onSuccess(values)
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   return (
@@ -72,8 +80,8 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
         )}
       </FormField>
 
-      <Button type="submit" size="lg" className="w-full">
-        Log in
+      <Button type="submit" size="lg" className="w-full" disabled={submitting}>
+        {submitting ? 'Logging in…' : 'Log in'}
       </Button>
     </form>
   )

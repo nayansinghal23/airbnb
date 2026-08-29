@@ -54,6 +54,10 @@ app.use(
   proxy(process.env.HOTEL_SERVICE_URL || "http://localhost:3001"),
 );
 app.use(
+  '/api/v1/hotel/:hotelId/room-categories',
+  proxy(process.env.HOTEL_SERVICE_URL || "http://localhost:3001"),
+);
+app.use(
   '/api/v1/hotel',
   fetchAllRolesMiddleware('admin'),
   proxy(process.env.HOTEL_SERVICE_URL || "http://localhost:3001"),

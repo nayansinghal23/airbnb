@@ -1,7 +1,13 @@
+import Button from '../ui/Button'
 import type { Hotel } from '../../lib/hotelApi'
 
+interface HotelCardProps {
+  hotel: Hotel
+  onBookNow: (hotel: Hotel) => void
+}
+
 /** Presentational browse card for a single hotel (user-facing). */
-export default function HotelCard({ hotel }: { hotel: Hotel }) {
+export default function HotelCard({ hotel, onBookNow }: HotelCardProps) {
   return (
     <article className="flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-shadow hover:shadow-md">
       <div className="flex items-start justify-between gap-3">
@@ -33,6 +39,15 @@ export default function HotelCard({ hotel }: { hotel: Hotel }) {
         </svg>
         {hotel.location}
       </p>
+
+      <Button
+        onClick={() => onBookNow(hotel)}
+        size="md"
+        className="mt-5 w-full"
+        aria-label={`Book ${hotel.name}`}
+      >
+        Book now
+      </Button>
     </article>
   )
 }

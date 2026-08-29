@@ -4,9 +4,13 @@ import Button from '../components/ui/Button'
 import Container from '../components/ui/Container'
 import Logo from '../components/ui/Logo'
 import HotelCard from '../components/hotel/HotelCard'
+import Modal from '../components/ui/Modal'
+import BookNowForm from '../components/booking/BookNowForm'
 import { useAuth } from '../context/AuthContext'
+import { useToast } from '../context/ToastContext'
 import { listAllHotels } from '../lib/hotelApi'
 import type { Hotel } from '../lib/hotelApi'
+import { createBooking } from '../lib/bookingApi'
 
 /** Extract a human-readable message from an API response body, if present. */
 function messageFrom(data: unknown, fallback: string): string {
@@ -20,11 +24,13 @@ function messageFrom(data: unknown, fallback: string): string {
 /** User-facing page: browse all hotels (route: /hotels). */
 export default function HotelsPage() {
   const { user, logout } = useAuth()
+  const { showToast } = useToast()
   const navigate = useNavigate()
 
   const [hotels, setHotels] = useState<Hotel[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [bookForHotel, setBookForHotel] = useState<Hotel | null>(null)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -107,7 +113,7 @@ export default function HotelsPage() {
               <ul className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                 {hotels.map((hotel) => (
                   <li key={hotel.id}>
-                    <HotelCard hotel={hotel} />
+                    <HotelCard hotel={hotel} onBookNow={setBookForHotel} />
                   </li>
                 ))}
               </ul>
@@ -115,6 +121,38 @@ export default function HotelsPage() {
           </div>
         </Container>
       </main>
+
+      <Modal
+        isOpen={bookForHotel !== null}
+        onClose={() => setBookForHotel(null)}
+        title={bookForHotel ? `Book ${bookForHotel.name}` : 'Book now'}
+      >
+        {bookForHotel && (
+          <BookNowForm
+            hotelId={bookForHotel.id}
+            onSubmit={async (values) => {
+              const payload = { hotelId: bookForHotel.id, ...values }
+              console.log('[booking] creating →', payload)
+              try {
+                const result = await createBooking(payload)
+                if (result.ok) {
+                  showToast('success', messageFrom(result.data, 'Booking confirmed!'))
+                  setBookForHotel(null)
+                } else {
+                  // Keep the modal open so the user can adjust and retry.
+                  showToast(
+                    'error',
+                    messageFrom(result.data, `Could not book (status ${result.status}).`),
+                  )
+                }
+              } catch (err) {
+                console.error('[booking] request error →', err)
+                showToast('error', 'Could not reach the server. Please try again.')
+              }
+            }}
+          />
+        )}
+      </Modal>
     </div>
   )
 }

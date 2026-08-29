@@ -6,3 +6,10 @@ export async function findRoomCategoryById(id: number) {
     });
     return roomCategory;
 }
+
+export async function findRoomCategoriesByHotelId(hotelId: number) {
+    const roomCategories = await prisma.roomCategory.findMany({
+        where: { hotelId },
+    });
+    return roomCategories;
+}

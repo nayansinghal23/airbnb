@@ -1,6 +1,6 @@
 import express from "express";
 
-import { createHotelHandler, fetchHotelsByOwnerIdHandler, getAllHotelsHandler, getHotelByIdHandler, softDeleteHotelHandler } from "../controllers/hotel.controller";
+import { createHotelHandler, fetchHotelsByOwnerIdHandler, findRoomCategoriesByHotelIdHandler, getAllHotelsHandler, getHotelByIdHandler, softDeleteHotelHandler } from "../controllers/hotel.controller";
 
 import { validateBody } from "../middlewares/validate.middleware";
 
@@ -12,6 +12,7 @@ hotelRouter.post('/', validateBody(createHotelSchema), createHotelHandler);
 hotelRouter.get('/', getAllHotelsHandler);
 hotelRouter.get('/owner/:ownerId', fetchHotelsByOwnerIdHandler);
 hotelRouter.get('/:hotelId', getHotelByIdHandler);
+hotelRouter.get('/:hotelId/room-categories', findRoomCategoriesByHotelIdHandler);
 hotelRouter.post('/:hotelId/delete', softDeleteHotelHandler);
 
 export default hotelRouter;

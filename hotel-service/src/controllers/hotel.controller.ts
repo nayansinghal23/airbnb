@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 
-import { createHotelService, fetchHotelsByOwnerIdService, getAllHotelsService, getHotelByIdService, softDeleteHotelService } from '../services/hotel.service';
+import { createHotelService, fetchHotelsByOwnerIdService, findRoomCategoriesByHotelIdService, getAllHotelsService, getHotelByIdService, softDeleteHotelService } from '../services/hotel.service';
 
 export async function createHotelHandler(req: Request, res: Response) {
     try {
@@ -127,6 +127,31 @@ export async function fetchHotelsByOwnerIdHandler(req: Request, res: Response) {
         return res.status(500).json({
             success: false,
             message: "Failed to fetch hotel",
+        });
+    }
+}
+
+export async function findRoomCategoriesByHotelIdHandler(req: Request, res: Response) {
+    try {
+        const hotelId = Number(req.params.hotelId);
+        if(!hotelId || Number.isNaN(hotelId)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid Hotel ID",
+            });
+        }
+
+        const roomCategories = await findRoomCategoriesByHotelIdService(hotelId);
+
+        return res.status(200).json({
+            success: true,
+            data: roomCategories,
+            message: "Room categories fetched successfully",
+        });
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Failed to fetch room categories",
         });
     }
 }

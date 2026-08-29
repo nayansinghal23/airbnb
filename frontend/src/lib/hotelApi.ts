@@ -31,6 +31,11 @@ export function createHotel(payload: CreateHotelPayload): Promise<ApiResult> {
   return apiPost('/hotel', payload)
 }
 
+/** Soft-delete a hotel via `POST ${API_BASE}/hotel/:hotelId/delete`. */
+export function softDeleteHotel(hotelId: number): Promise<ApiResult> {
+  return apiPost(`/hotel/${hotelId}/delete`, {})
+}
+
 interface HotelsResponse {
   success: boolean
   data: Hotel[]

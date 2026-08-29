@@ -7,7 +7,7 @@ import CreateHotelForm from '../components/hotel/CreateHotelForm'
 import HotelList from '../components/hotel/HotelList'
 import { useAuth } from '../context/AuthContext'
 import { useToast } from '../context/ToastContext'
-import { createHotel, listHotelsByOwner } from '../lib/hotelApi'
+import { createHotel, listHotelsByOwner, softDeleteHotel } from '../lib/hotelApi'
 import type { Hotel } from '../lib/hotelApi'
 
 /** Extract a human-readable message from an API response body, if present. */
@@ -55,6 +55,29 @@ export default function AdminPage() {
   useEffect(() => {
     void loadHotels()
   }, [loadHotels])
+
+  const handleDeleteHotel = useCallback(
+    async (hotel: Hotel) => {
+      try {
+        const result = await softDeleteHotel(hotel.id)
+        if (result.ok) {
+          showToast('success', messageFrom(result.data, `"${hotel.name}" deleted.`))
+          // Optimistically drop it, then re-sync with the server.
+          setHotels((list) => list.filter((h) => h.id !== hotel.id))
+          void loadHotels()
+        } else {
+          showToast(
+            'error',
+            messageFrom(result.data, `Could not delete hotel (status ${result.status}).`),
+          )
+        }
+      } catch (err) {
+        console.error('[hotel] delete error →', err)
+        showToast('error', 'Could not reach the server. Please try again.')
+      }
+    },
+    [showToast, loadHotels],
+  )
 
   function handleLogout() {
     logout()
@@ -156,7 +179,12 @@ export default function AdminPage() {
             </div>
 
             <div className="mt-6">
-              <HotelList hotels={hotels} loading={hotelsLoading} error={hotelsError} />
+              <HotelList
+                hotels={hotels}
+                loading={hotelsLoading}
+                error={hotelsError}
+                onDelete={handleDeleteHotel}
+              />
             </div>
           </section>
         </Container>

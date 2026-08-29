@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 
-import { createHotelService, fetchHotelsByOwnerIdService, findRoomCategoriesByHotelIdService, getAllHotelsService, getHotelByIdService, softDeleteHotelService } from '../services/hotel.service';
+import { createHotelService, createRoomCategoriesService, fetchHotelsByOwnerIdService, findRoomCategoriesByHotelIdService, getAllHotelsService, getHotelByIdService, softDeleteHotelService } from '../services/hotel.service';
 
 export async function createHotelHandler(req: Request, res: Response) {
     try {
@@ -10,6 +10,14 @@ export async function createHotelHandler(req: Request, res: Response) {
             return res.status(500).json({
                 success: false,
                 message: "Failed to create a hotel",
+            });
+        }
+
+        const categories = await createRoomCategoriesService(hotel.id);
+        if(!categories) {
+            return res.status(500).json({
+                success: false,
+                message: `Failed to create categories corresponding to hotel ${hotel.id}`,
             });
         }
 

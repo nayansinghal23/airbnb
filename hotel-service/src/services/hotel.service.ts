@@ -1,10 +1,14 @@
 import { createHotel, fetchHotelsByOwnerId, getAllHotels, getHotelById, softDeleteHotel } from "../repositories/hotel.repository";
-import { findRoomCategoriesByHotelId } from "../repositories/roomCategory.repository";
+import { createRoomCategories, findRoomCategoriesByHotelId } from "../repositories/roomCategory.repository";
 
 import { CreateHotelDTO } from "../dto/hotel.dto";
 
 export async function createHotelService(hotel: CreateHotelDTO) {
     return createHotel(hotel);
+}
+
+export async function createRoomCategoriesService(hotelId: number) {
+    return createRoomCategories(hotelId);
 }
 
 export async function getHotelByIdService(id: number) {

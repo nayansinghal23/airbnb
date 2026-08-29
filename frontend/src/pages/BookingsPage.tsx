@@ -57,7 +57,6 @@ export default function BookingsPage() {
 
   const handleConfirm = useCallback(
     async (booking: Booking) => {
-      console.log('[booking] confirming →', booking.id, booking.idempotencyKey)
       try {
         const result = await confirmBooking(booking.idempotencyKey)
         if (result.ok) {

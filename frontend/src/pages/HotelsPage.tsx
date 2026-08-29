@@ -137,7 +137,6 @@ export default function HotelsPage() {
             hotelId={bookForHotel.id}
             onSubmit={async (values) => {
               const payload = { hotelId: bookForHotel.id, ...values }
-              console.log('[booking] creating →', payload)
               try {
                 const result = await createBooking(payload)
                 if (result.ok) {

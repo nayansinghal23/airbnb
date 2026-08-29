@@ -54,10 +54,12 @@ This is a **Vite + React 18 + TypeScript + Tailwind CSS 3** app. Follow the rule
 - **`strict` mode is on.** No `any` — type props, state, and handlers explicitly. Prefer union types and discriminated unions over loose strings.
 - **No unused locals/params** (enforced by tsconfig). Keep imports clean.
 - **Meaningful names.** Components in PascalCase, hooks as `useX`, files match their default export.
+- **No `console.log` or `console.warn` in committed code.** Surface state and outcomes through the UI (toasts, inline messages), not the console. `console.error` is allowed only inside `catch` blocks for genuinely unexpected errors. Remove all debug logging before finishing.
 
 ## Before finishing any change
 
 1. `npm run build` passes (this runs `tsc` — type errors block the build).
-2. New/changed UI is keyboard-navigable and screen-reader labelled.
-3. Layout verified from mobile to desktop with no overflow.
+2. No `console.log` / `console.warn` left in the code (see above).
+3. New/changed UI is keyboard-navigable and screen-reader labelled.
+4. Layout verified from mobile to desktop with no overflow.
 4. Any repeated markup has been extracted into a reusable component.

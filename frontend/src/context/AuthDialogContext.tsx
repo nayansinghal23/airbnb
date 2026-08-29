@@ -56,12 +56,10 @@ export function AuthDialogProvider({ children }: { children: ReactNode }) {
       <Modal isOpen={dialog === 'login'} onClose={close} title="Log in to StayEase">
         <LoginForm
           onSuccess={async (values) => {
-            console.log('[login] submitting →', values)
             try {
               const result = await loginUser(values)
 
               if (!result.ok || !result.data?.token) {
-                console.warn(`[login] failed (status ${result.status}) →`, result.data)
                 showToast(
                   'error',
                   messageFrom(result.data, `Login failed (status ${result.status}).`),
@@ -72,16 +70,11 @@ export function AuthDialogProvider({ children }: { children: ReactNode }) {
               // 1. Persist the session (token + userId from the response body).
               const { token, userId } = result.data
               setSession({ userId, email: values.email, token })
-              console.log('[login] success → session stored for user', userId)
               showToast('success', messageFrom(result.data, 'Logged in successfully!'))
               close()
 
               // 2. Fetch the user's role; on failure, log out immediately.
               const rolesRes = await fetchUserRoles(userId)
-              console.log(
-                `[roles] fetched (status ${rolesRes.status}) →`,
-                rolesRes.data,
-              )
 
               if (rolesRes.ok && rolesRes.data?.success && rolesRes.data.role) {
                 const role = rolesRes.data.role
@@ -89,7 +82,6 @@ export function AuthDialogProvider({ children }: { children: ReactNode }) {
                 // 3. Redirect by role: admins to the dashboard, users to browse hotels.
                 navigate(role === 'admin' ? '/admin' : '/hotels')
               } else {
-                console.warn('[roles] could not resolve role → logging out')
                 showToast('error', 'Could not verify your role. You have been logged out.')
                 logout()
               }
@@ -104,24 +96,15 @@ export function AuthDialogProvider({ children }: { children: ReactNode }) {
       <Modal isOpen={dialog === 'register'} onClose={close} title="Create your account">
         <RegisterForm
           onSuccess={async (values) => {
-            console.log('[register] submitting →', values)
             try {
               const result = await registerUser(values)
               if (result.ok) {
-                console.log(
-                  `[register] success (status ${result.status}) →`,
-                  result.data,
-                )
                 showToast(
                   'success',
                   messageFrom(result.data, 'Account created successfully!'),
                 )
                 close()
               } else {
-                console.warn(
-                  `[register] failed (status ${result.status}) →`,
-                  result.data,
-                )
                 showToast(
                   'error',
                   messageFrom(result.data, `Registration failed (status ${result.status}).`),

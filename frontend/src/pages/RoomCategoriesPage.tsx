@@ -148,12 +148,6 @@ export default function RoomCategoriesPage() {
           <AddRoomsForm
             category={addForCategory}
             onSubmit={async ({ startDate, endDate, scheduleType }) => {
-              console.log('[room] adding →', {
-                roomCategoryId: addForCategory.id,
-                startDate,
-                endDate,
-                scheduleType,
-              })
               try {
                 const result = await addRooms(scheduleType, {
                   roomCategoryId: addForCategory.id,

@@ -5,7 +5,7 @@ import { verifyJWTToken } from '../utils/verifyJWTToken';
 import { loginService } from '../services/user.service';
 
 export const jwtAuthMiddlware = async (req: Request, res: Response, next: NextFunction) => {
-    const publicPaths = ['/login', '/register'];
+    const publicPaths = ['/login', '/register', "/logout"];
     if (publicPaths.includes(req.path)) return next();
 
     const access_token = req.cookies['access_token']

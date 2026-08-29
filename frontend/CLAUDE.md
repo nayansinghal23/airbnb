@@ -41,6 +41,14 @@ This is a **Vite + React 18 + TypeScript + Tailwind CSS 3** app. Follow the rule
 - **Keep class lists readable.** For components with conditional/variant classes, group them into a small helper (e.g. a variant map) instead of long ternary chains inline.
 - **Stay consistent** with the existing color, spacing, and radius scale — extend the theme rather than one-off hex values.
 
+## API calls — auth is mandatory on every request
+
+- **Go through the shared client** in `src/lib/apiClient.ts` (`apiPost` / `apiGet`). Do **not** call `fetch` directly from components or feature API modules.
+- **The token travels in the httpOnly `access_token` cookie, never in a header.** Every request MUST set **`credentials: 'include'`** so the browser attaches that cookie — this is how the backend authenticates via `req.cookies['access_token']`. Do **not** add an `Authorization: Bearer` header. Any new request helper must include `credentials: 'include'`.
+- **The cookie is httpOnly**, so JS cannot read or set it — the server sets it on login and clears it on logout; the client's only job is to send it with credentials. In dev this works because the Vite proxy keeps requests same-origin (see `vite.config.ts`); cross-site deploys need the cookie set with `SameSite=None; Secure`.
+- **Base URL lives in one place** — `VITE_AUTH_API_URL` (`.env`), consumed as `API_BASE`. Never hardcode `http://localhost:...` in feature code.
+- **Feature API modules** (e.g. `authApi.ts`, `hotelApi.ts`) are thin wrappers over the shared client that only define paths, payloads, and response types.
+
 ## TypeScript & code quality
 
 - **`strict` mode is on.** No `any` — type props, state, and handlers explicitly. Prefer union types and discriminated unions over loose strings.

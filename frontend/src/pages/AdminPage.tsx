@@ -1,11 +1,14 @@
+import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Button from '../components/ui/Button'
 import Container from '../components/ui/Container'
 import Logo from '../components/ui/Logo'
 import CreateHotelForm from '../components/hotel/CreateHotelForm'
+import HotelList from '../components/hotel/HotelList'
 import { useAuth } from '../context/AuthContext'
 import { useToast } from '../context/ToastContext'
-import { createHotel } from '../lib/hotelApi'
+import { createHotel, listHotelsByOwner } from '../lib/hotelApi'
+import type { Hotel } from '../lib/hotelApi'
 
 /** Extract a human-readable message from an API response body, if present. */
 function messageFrom(data: unknown, fallback: string): string {
@@ -21,6 +24,37 @@ export default function AdminPage() {
   const { user, logout } = useAuth()
   const { showToast } = useToast()
   const navigate = useNavigate()
+
+  const ownerId = user?.userId
+
+  const [hotels, setHotels] = useState<Hotel[]>([])
+  const [hotelsLoading, setHotelsLoading] = useState(true)
+  const [hotelsError, setHotelsError] = useState<string | null>(null)
+
+  const loadHotels = useCallback(async () => {
+    if (ownerId === undefined) return
+    setHotelsLoading(true)
+    setHotelsError(null)
+    try {
+      const result = await listHotelsByOwner(ownerId)
+      if (result.ok && result.data?.success) {
+        setHotels(result.data.data ?? [])
+      } else {
+        setHotelsError(
+          messageFrom(result.data, `Could not load hotels (status ${result.status}).`),
+        )
+      }
+    } catch (err) {
+      console.error('[hotel] list error →', err)
+      setHotelsError('Could not reach the server. Please try again.')
+    } finally {
+      setHotelsLoading(false)
+    }
+  }, [ownerId])
+
+  useEffect(() => {
+    void loadHotels()
+  }, [loadHotels])
 
   function handleLogout() {
     logout()
@@ -78,6 +112,7 @@ export default function AdminPage() {
                         'success',
                         messageFrom(result.data, `Hotel "${values.name}" created.`),
                       )
+                      void loadHotels() // refresh the list
                     } else {
                       showToast(
                         'error',
@@ -96,6 +131,32 @@ export default function AdminPage() {
                   }
                 }}
               />
+            </div>
+          </section>
+
+          <section
+            aria-labelledby="your-hotels-heading"
+            className="mt-8 max-w-3xl rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8"
+          >
+            <div className="flex items-center justify-between gap-4">
+              <h2
+                id="your-hotels-heading"
+                className="text-xl font-semibold text-slate-900"
+              >
+                Your hotels
+              </h2>
+              <Button
+                onClick={() => void loadHotels()}
+                variant="ghost"
+                size="sm"
+                disabled={hotelsLoading}
+              >
+                {hotelsLoading ? 'Refreshing…' : 'Refresh'}
+              </Button>
+            </div>
+
+            <div className="mt-6">
+              <HotelList hotels={hotels} loading={hotelsLoading} error={hotelsError} />
             </div>
           </section>
         </Container>

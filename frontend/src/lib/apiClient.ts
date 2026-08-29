@@ -2,8 +2,9 @@
  * Shared API client for the backend gateway.
  *
  * The base URL comes from VITE_AUTH_API_URL (see `.env`) so it can be changed in
- * one place per environment. All requests send credentials so the httpOnly auth
- * cookie is included.
+ * one place per environment. Every request sends `credentials: 'include'` so the
+ * httpOnly `access_token` cookie (set by the server on login) is attached — this
+ * is how the backend authenticates each request via `req.cookies['access_token']`.
  */
 
 export const API_BASE = import.meta.env.VITE_AUTH_API_URL
@@ -32,7 +33,7 @@ export async function apiPost<T = unknown>(
   const response = await fetch(`${API_BASE}${path}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    credentials: 'include',
+    credentials: 'include', // send the access_token cookie
     body: JSON.stringify(payload),
   })
   return parse<T>(response)
@@ -41,7 +42,7 @@ export async function apiPost<T = unknown>(
 export async function apiGet<T = unknown>(path: string): Promise<ApiResult<T>> {
   const response = await fetch(`${API_BASE}${path}`, {
     method: 'GET',
-    credentials: 'include',
+    credentials: 'include', // send the access_token cookie
   })
   return parse<T>(response)
 }

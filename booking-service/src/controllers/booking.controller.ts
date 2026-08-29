@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 
 import { confirmBookingService, createBookingService, getBookingsForUserIdService } from '../services/booking.service';
+import { sendEmail } from '../services/email.service';
 
 export const createBookingController = async (req: Request, res: Response) => {
     try {
@@ -19,6 +20,13 @@ export const createBookingController = async (req: Request, res: Response) => {
                 message: "Unable to create a booking"
             })
         }
+
+        await sendEmail({
+            userId: Number(userId),
+            cookie,
+            subject: "Booking created – proceed with payment",
+            templateId: "welcome"
+        });
     
         res.status(201).json({
             bookingId: booking.bookingId,
@@ -34,6 +42,14 @@ export const createBookingController = async (req: Request, res: Response) => {
 
 export const confrimBookingController = async (req: Request, res: Response) => {
     try {
+        const cookie = req.headers.cookie, userId = req.headers['x-user-id'];
+        if(!cookie || !cookie.includes("access_token") || !userId) {
+            return res.status(401).json({
+                success: false,
+                message: "User is not authenticated",
+            })
+        }
+
         const booking = await confirmBookingService(req.params.idempotencyKey);
         if(!booking) {
             return res.status(400).json({
@@ -42,6 +58,12 @@ export const confrimBookingController = async (req: Request, res: Response) => {
             })
         }
 
+        await sendEmail({
+            userId: booking.userId,
+            cookie,
+            subject: "Booking confirmed – payment successful",
+            templateId: "booked"
+        });
         res.status(200).json({
             bookingId: booking.id,
             status: booking.status,

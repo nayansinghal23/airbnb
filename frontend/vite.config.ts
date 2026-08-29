@@ -5,7 +5,7 @@ import react from '@vitejs/plugin-react'
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
   // Where the dev proxy forwards /api requests (the auth service).
-  const proxyTarget = env.AUTH_PROXY_TARGET || 'http://localhost:3007'
+  const proxyTarget = env.AUTH_PROXY_TARGET || 'http://localhost:3008'
 
   return {
     plugins: [react()],

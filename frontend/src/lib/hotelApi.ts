@@ -10,6 +10,7 @@ export interface CreateHotelPayload {
   name: string
   address: string
   location: string
+  ownerId: number
 }
 
 /** POST a new hotel to `${API_BASE}/hotel`. */

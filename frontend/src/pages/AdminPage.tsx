@@ -69,23 +69,16 @@ export default function AdminPage() {
             <div className="mt-6">
               <CreateHotelForm
                 onSubmit={async (values) => {
-                  console.log('[hotel] creating →', values)
+                  if (!user) throw new Error('Not authenticated')
                   try {
-                    const result = await createHotel(values)
+                    // ownerId comes from the auth context (the logged-in admin).
+                    const result = await createHotel({ ...values, ownerId: user.userId })
                     if (result.ok) {
-                      console.log(
-                        `[hotel] created (status ${result.status}) →`,
-                        result.data,
-                      )
                       showToast(
                         'success',
                         messageFrom(result.data, `Hotel "${values.name}" created.`),
                       )
                     } else {
-                      console.warn(
-                        `[hotel] failed (status ${result.status}) →`,
-                        result.data,
-                      )
                       showToast(
                         'error',
                         messageFrom(

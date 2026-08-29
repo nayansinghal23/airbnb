@@ -48,7 +48,11 @@ app.use(
   '/api/v1/booking',
   proxy(process.env.BOOKING_SERVICE_URL || "http://localhost:3000")
 );
-
+app.use(
+  '/api/v1/users/hotels',
+  fetchAllRolesMiddleware('user'),
+  proxy(process.env.HOTEL_SERVICE_URL || "http://localhost:3001"),
+);
 app.use(
   '/api/v1/hotel',
   fetchAllRolesMiddleware('admin'),

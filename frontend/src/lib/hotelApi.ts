@@ -49,6 +49,11 @@ export function listHotelsByOwner(
   return apiGet<HotelsResponse>(`/hotel/owner/${ownerId}`)
 }
 
+/** GET all hotels from `${API_BASE}/hotel` (user-facing browse list). */
+export function listAllHotels(): Promise<ApiResult<HotelsResponse>> {
+  return apiGet<HotelsResponse>('/users/hotels')
+}
+
 export type RoomType = 'SINGLE' | 'DOUBLE' | 'FAMILY' | 'DELUXE' | 'SUITE'
 
 export interface RoomCategory {

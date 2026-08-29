@@ -2,7 +2,9 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import LandingPage from './pages/LandingPage'
 import AdminPage from './pages/AdminPage'
 import RoomCategoriesPage from './pages/RoomCategoriesPage'
+import HotelsPage from './pages/HotelsPage'
 import RequireAdmin from './components/RequireAdmin'
+import RequireAuth from './components/RequireAuth'
 import { AuthProvider } from './context/AuthContext'
 import { AuthDialogProvider } from './context/AuthDialogContext'
 import { ToastProvider } from './context/ToastContext'
@@ -15,6 +17,14 @@ function App() {
           <AuthDialogProvider>
             <Routes>
               <Route path="/" element={<LandingPage />} />
+              <Route
+                path="/hotels"
+                element={
+                  <RequireAuth>
+                    <HotelsPage />
+                  </RequireAuth>
+                }
+              />
               <Route
                 path="/admin"
                 element={

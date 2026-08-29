@@ -29,9 +29,13 @@ export default function Navbar() {
           <div className="flex items-center gap-2 sm:gap-3">
             {isAuthenticated ? (
               <>
-                {user?.role === 'admin' && (
+                {user?.role === 'admin' ? (
                   <Button onClick={() => navigate('/admin')} variant="ghost" size="sm">
                     Dashboard
+                  </Button>
+                ) : (
+                  <Button onClick={() => navigate('/hotels')} variant="ghost" size="sm">
+                    Browse hotels
                   </Button>
                 )}
                 <Button onClick={logout} variant="secondary" size="sm">

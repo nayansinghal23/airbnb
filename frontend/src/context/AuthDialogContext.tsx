@@ -86,8 +86,8 @@ export function AuthDialogProvider({ children }: { children: ReactNode }) {
               if (rolesRes.ok && rolesRes.data?.success && rolesRes.data.role) {
                 const role = rolesRes.data.role
                 setRole(role)
-                // 3. Redirect admins to the admin route.
-                if (role === 'admin') navigate('/admin')
+                // 3. Redirect by role: admins to the dashboard, users to browse hotels.
+                navigate(role === 'admin' ? '/admin' : '/hotels')
               } else {
                 console.warn('[roles] could not resolve role → logging out')
                 showToast('error', 'Could not verify your role. You have been logged out.')

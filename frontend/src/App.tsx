@@ -3,6 +3,7 @@ import LandingPage from './pages/LandingPage'
 import AdminPage from './pages/AdminPage'
 import RoomCategoriesPage from './pages/RoomCategoriesPage'
 import HotelsPage from './pages/HotelsPage'
+import BookingsPage from './pages/BookingsPage'
 import RequireAdmin from './components/RequireAdmin'
 import RequireAuth from './components/RequireAuth'
 import { AuthProvider } from './context/AuthContext'
@@ -22,6 +23,14 @@ function App() {
                 element={
                   <RequireAuth>
                     <HotelsPage />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/bookings"
+                element={
+                  <RequireAuth>
+                    <BookingsPage />
                   </RequireAuth>
                 }
               />

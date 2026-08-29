@@ -3,7 +3,7 @@
  * Requires an authenticated cookie.
  */
 
-import { apiPost } from './apiClient'
+import { apiGet, apiPost } from './apiClient'
 import type { ApiResult } from './apiClient'
 
 export interface CreateBookingPayload {
@@ -20,4 +20,33 @@ export interface CreateBookingPayload {
 /** POST a booking to `${API_BASE}/booking`. */
 export function createBooking(payload: CreateBookingPayload): Promise<ApiResult> {
   return apiPost('/booking', payload)
+}
+
+export type BookingStatus = 'PENDING' | 'CONFIRMED' | 'CANCELLED'
+
+export interface Booking {
+  id: number
+  userId: number
+  hotelId: number
+  checkInDate: string
+  checkOutDate: string
+  roomCategoryId: number
+  createdAt: string
+  updatedAt: string
+  amount: number
+  status: BookingStatus
+  totalGuests: number
+}
+
+interface BookingsResponse {
+  success: boolean
+  data: Booking[]
+  message: string
+}
+
+/** GET a user's bookings from `${API_BASE}/booking/user/:userId`. */
+export function listUserBookings(
+  userId: number,
+): Promise<ApiResult<BookingsResponse>> {
+  return apiGet<BookingsResponse>(`/booking/user/${userId}`)
 }

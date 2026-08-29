@@ -88,14 +88,19 @@ export default function HotelsPage() {
                 Find your next stay from our list of hotels.
               </p>
             </div>
-            <Button
-              onClick={() => void load()}
-              variant="ghost"
-              size="sm"
-              disabled={loading}
-            >
-              {loading ? 'Refreshing…' : 'Refresh'}
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button onClick={() => navigate('/bookings')} variant="secondary" size="sm">
+                My bookings
+              </Button>
+              <Button
+                onClick={() => void load()}
+                variant="ghost"
+                size="sm"
+                disabled={loading}
+              >
+                {loading ? 'Refreshing…' : 'Refresh'}
+              </Button>
+            </div>
           </div>
 
           <div className="mt-8">

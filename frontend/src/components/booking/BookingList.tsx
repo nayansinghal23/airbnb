@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import Button from '../ui/Button'
 import type { Booking, BookingStatus } from '../../lib/bookingApi'
 
@@ -6,8 +7,11 @@ interface BookingListProps {
   loading: boolean
   error: string | null
   /** Called when a PENDING booking's Confirm CTA is clicked. */
-  onConfirm: (booking: Booking) => void
+  onConfirm: (booking: Booking) => void | Promise<void>
 }
+
+/** A pending booking can only be confirmed within this window of its last update. */
+const CONFIRM_WINDOW_MS = 5 * 60 * 1000
 
 const priceFormatter = new Intl.NumberFormat('en-IN', {
   style: 'currency',
@@ -39,6 +43,24 @@ function StatusBadge({ status }: { status: BookingStatus }) {
 
 /** Presentational list of a user's bookings with all UI states. */
 export default function BookingList({ bookings, loading, error, onConfirm }: BookingListProps) {
+  // Tick so the confirm window expires on its own without a manual refresh.
+  const [now, setNow] = useState(() => Date.now())
+  const [confirmingId, setConfirmingId] = useState<number | null>(null)
+
+  useEffect(() => {
+    const id = window.setInterval(() => setNow(Date.now()), 15_000)
+    return () => window.clearInterval(id)
+  }, [])
+
+  async function handleConfirm(booking: Booking) {
+    setConfirmingId(booking.id)
+    try {
+      await onConfirm(booking)
+    } finally {
+      setConfirmingId(null)
+    }
+  }
+
   if (loading) {
     return (
       <p className="text-sm text-slate-500" role="status">
@@ -88,15 +110,25 @@ export default function BookingList({ bookings, loading, error, onConfirm }: Boo
               </p>
             </div>
 
-            {booking.status === 'PENDING' && (
-              <Button
-                onClick={() => onConfirm(booking)}
-                size="sm"
-                className="shrink-0"
-              >
-                Confirm booking
-              </Button>
-            )}
+            {booking.status === 'PENDING' &&
+              (now - Date.parse(booking.updatedAt) >= CONFIRM_WINDOW_MS ? (
+                <span
+                  className="shrink-0 cursor-not-allowed rounded-lg bg-slate-100 px-4 py-2 text-sm font-medium text-slate-400"
+                  aria-disabled="true"
+                  title="This booking can no longer be confirmed"
+                >
+                  Confirmation window expired
+                </span>
+              ) : (
+                <Button
+                  onClick={() => void handleConfirm(booking)}
+                  size="sm"
+                  className="shrink-0"
+                  disabled={confirmingId === booking.id}
+                >
+                  {confirmingId === booking.id ? 'Confirming…' : 'Confirm booking'}
+                </Button>
+              ))}
           </div>
         </li>
       ))}

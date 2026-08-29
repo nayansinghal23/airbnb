@@ -5,7 +5,8 @@ import Container from '../components/ui/Container'
 import Logo from '../components/ui/Logo'
 import BookingList from '../components/booking/BookingList'
 import { useAuth } from '../context/AuthContext'
-import { listUserBookings } from '../lib/bookingApi'
+import { useToast } from '../context/ToastContext'
+import { confirmBooking, listUserBookings } from '../lib/bookingApi'
 import type { Booking } from '../lib/bookingApi'
 
 /** Extract a human-readable message from an API response body, if present. */
@@ -20,6 +21,7 @@ function messageFrom(data: unknown, fallback: string): string {
 /** User-facing page: the signed-in user's bookings (route: /bookings). */
 export default function BookingsPage() {
   const { user, logout } = useAuth()
+  const { showToast } = useToast()
   const navigate = useNavigate()
 
   const userId = user?.userId
@@ -52,6 +54,28 @@ export default function BookingsPage() {
   useEffect(() => {
     void load()
   }, [load])
+
+  const handleConfirm = useCallback(
+    async (booking: Booking) => {
+      console.log('[booking] confirming →', booking.id, booking.idempotencyKey)
+      try {
+        const result = await confirmBooking(booking.idempotencyKey)
+        if (result.ok) {
+          showToast('success', messageFrom(result.data, 'Booking confirmed!'))
+          void load() // refresh to reflect the new status
+        } else {
+          showToast(
+            'error',
+            messageFrom(result.data, `Could not confirm booking (status ${result.status}).`),
+          )
+        }
+      } catch (err) {
+        console.error('[booking] confirm error →', err)
+        showToast('error', 'Could not reach the server. Please try again.')
+      }
+    },
+    [showToast, load],
+  )
 
   function handleLogout() {
     logout()
@@ -102,10 +126,7 @@ export default function BookingsPage() {
               bookings={bookings}
               loading={loading}
               error={error}
-              onConfirm={(booking) => {
-                // No confirm API yet — just log for now.
-                console.log('[booking] confirm clicked →', booking)
-              }}
+              onConfirm={handleConfirm}
             />
           </div>
         </Container>

@@ -76,7 +76,15 @@ export async function finalizeIdempotencyKey(tx: Prisma.TransactionClient, idemK
 }
 
 export async function getBookingsForUserId(userId: number) {
-    return prisma.booking.findMany({
-        where: { userId }
+    const bookings = await prisma.booking.findMany({
+        where: { userId },
+        include: {
+            idempotencyKey: {
+                select: {
+                    idemKey: true,
+                }
+            }
+        }
     });
+    return bookings.map(booking => ({ ...booking, idempotencyKey: booking.idempotencyKey?.idemKey }))
 }

@@ -36,6 +36,7 @@ export interface Booking {
   amount: number
   status: BookingStatus
   totalGuests: number
+  idempotencyKey: string
 }
 
 interface BookingsResponse {
@@ -49,4 +50,9 @@ export function listUserBookings(
   userId: number,
 ): Promise<ApiResult<BookingsResponse>> {
   return apiGet<BookingsResponse>(`/booking/user/${userId}`)
+}
+
+/** POST `${API_BASE}/booking/confirm/:idempotencyKey` to confirm a pending booking. */
+export function confirmBooking(idempotencyKey: string): Promise<ApiResult> {
+  return apiPost(`/booking/confirm/${idempotencyKey}`, {})
 }

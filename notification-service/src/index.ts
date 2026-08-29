@@ -3,7 +3,6 @@ import dotenv from "dotenv";
 
 import { setupMailWorker } from "./processors/email.processor";
 import { addEmailToQueue } from "./producers/email.producer";
-import { renderMailTemplate } from "./templates/templates.handler";
 
 dotenv.config();
 
@@ -24,7 +23,7 @@ async function sendMail() {
     },
   });
 }
-sendMail();
+// sendMail();
 
 
 app.listen(PORT, () => {

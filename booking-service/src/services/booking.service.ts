@@ -13,6 +13,7 @@ import { CreateBookingDTO } from '../dto/booking.dto';
 import { prisma } from '../lib/prisma';
 import { TTL, redLock } from '../config/redis.config';
 import { getAvailableRooms, updateBookingIdToRooms } from '../api/hotel.api';
+import { addEmailToQueue } from '../producers/email.producer';
 
 export async function createBookingService(dto: CreateBookingDTO) {
     const bookingResource = `hotel:${dto.hotelId}`;
@@ -46,6 +47,15 @@ export async function createBookingService(dto: CreateBookingDTO) {
         const idempotencyKey = generateIdempotencyKey();
         await createIdempotencyKey(idempotencyKey, booking.id);
         await updateBookingIdToRooms(booking.id, availableRooms.map((room: any) => room.id))
+        await addEmailToQueue({
+            to: "nayansinghal393@gmail.com",
+            subject: "Booking created – proceed with payment",
+            templateId: "welcome",
+            params: {
+              name: "Nayan",
+              orderId: booking.id,
+            }
+        });
         return {
             bookingId: booking.id,
             idempotencyKey,

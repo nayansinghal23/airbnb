@@ -7,6 +7,7 @@ import v1Router from "./routers";
 
 import { rateLimitingMiddleware } from "./middlewares/rateLimitingMiddleware";
 import { jwtAuthMiddlware } from "./middlewares/jwtAuthMiddleware";
+import { fetchAllRolesMiddleware } from "./middlewares/fetchAllRolesMiddleware";
 
 import { proxy } from "./utils/proxy";
 
@@ -50,7 +51,8 @@ app.use(
 
 app.use(
   '/api/v1/hotel',
-  proxy(process.env.HOTEL_SERVICE_URL || "http://localhost:3001")
+  fetchAllRolesMiddleware('admin'),
+  proxy(process.env.HOTEL_SERVICE_URL || "http://localhost:3001"),
 );
 
 app.use(express.json());

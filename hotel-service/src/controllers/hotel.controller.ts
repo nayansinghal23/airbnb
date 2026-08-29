@@ -65,7 +65,7 @@ export async function getAllHotelsHandler(req: Request, res: Response) {
         return res.status(200).json({
             success: true,
             data: hotels,
-            message: "Hotel created successfully",
+            message: "Hotel fetched successfully",
         });
     } catch (error) {
         return res.status(500).json({

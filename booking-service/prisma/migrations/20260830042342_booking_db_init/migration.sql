@@ -5,6 +5,7 @@ CREATE TABLE `Booking` (
     `hotelId` INTEGER NOT NULL,
     `checkInDate` DATETIME(3) NOT NULL,
     `checkOutDate` DATETIME(3) NOT NULL,
+    `roomCategoryId` INTEGER NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
     `amount` INTEGER NOT NULL,

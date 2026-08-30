@@ -20,5 +20,22 @@ jobs:
             - name: "Clone the repository"
               uses: actions/checkout@v2
 
-            - name: "Install dependencies"
+            - name: "Install auth service dependencies"
+              working-directory: ./auth-service
+              run: npm install
+
+            - name: "Install booking service dependencies"
+              working-directory: ./booking-service
+              run: npm install
+
+            - name: "Install frontend dependencies"
+              working-directory: ./frontend
+              run: npm install
+
+            - name: "Install hotel service dependencies"
+              working-directory: ./hotel-service
+              run: npm install
+
+            - name: "Install notification service dependencies"
+              working-directory: ./notification-service
               run: npm install

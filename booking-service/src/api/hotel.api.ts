@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const HOTEL_SERVICE_URL = 'http://localhost:3001/api/v1';
+const HOTEL_SERVICE_URL = 'https://airbnb-hotel-service.onrender.com/api/v1';
 
 export async function getAvailableRooms(roomCategoryId: number, hotelId: number, checkInDate: Date, checkOutDate: Date) {
     const response = await axios.get(`${HOTEL_SERVICE_URL}/room/available`, {

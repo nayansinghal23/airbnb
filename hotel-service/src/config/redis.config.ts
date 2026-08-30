@@ -1,14 +1,14 @@
-import Redis from "ioredis";
+import IORedis from "ioredis";
+
+const REDIS_SERVER_URL = process.env.REDIS_SERVER_URL || "redis://localhost:6379";
 
 // Singleton pattern
 function connectToRedis() {
     try {
-        let connection: Redis | null = null;
+        let connection: IORedis | null = null;
         return () => {
             if(!connection) {
-                connection = new Redis({
-                    port: Number(process.env.REDIS_PORT) || 6379,
-                    host: process.env.REDIS_HOST || 'localhost',
+                connection = new IORedis(REDIS_SERVER_URL, {
                     maxRetriesPerRequest: null,
                 });
             }

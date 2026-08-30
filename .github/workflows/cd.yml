@@ -1,0 +1,61 @@
+name: "CD Pipeline"
+
+on:
+  workflow_run:
+    workflows: ["Airbnb CI Pipeline / Workflow"]
+    types:
+      - completed
+
+jobs:
+  deploy:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: "Download auth service build"
+        uses: actions/download-artifact@v4
+        with:
+          name: auth-service-build
+          path: ./auth-service
+
+      - name: "Download booking service build"
+        uses: actions/download-artifact@v4
+        with:
+          name: booking-service-build
+          path: ./booking-service
+
+      - name: "Download frontend build"
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-build
+          path: ./frontend
+
+      - name: "Download hotel service build"
+        uses: actions/download-artifact@v4
+        with:
+          name: hotel-service-build
+          path: ./hotel-service
+
+      - name: "Download notification service build"
+        uses: actions/download-artifact@v4
+        with:
+          name: notification-service-build
+          path: ./notification-service
+
+      - name: "Check downloaded files"
+        run: |
+          echo "Auth service:"
+          ls -la ./auth-service
+
+          echo "Booking service:"
+          ls -la ./booking-service
+
+          echo "Frontend:"
+          ls -la ./frontend
+
+          echo "Hotel service:"
+          ls -la ./hotel-service
+
+          echo "Notification service:"
+          ls -la ./notification-service

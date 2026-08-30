@@ -12,36 +12,51 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    # Needed to read artifacts from the triggering CI workflow run via the API.
+    permissions:
+      actions: read
+      contents: read
+
     steps:
       - name: "Download auth service build"
         uses: actions/download-artifact@v4
         with:
           name: auth-service-build
           path: ./auth-service
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: "Download booking service build"
         uses: actions/download-artifact@v4
         with:
           name: booking-service-build
           path: ./booking-service
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: "Download frontend build"
         uses: actions/download-artifact@v4
         with:
           name: frontend-build
           path: ./frontend
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: "Download hotel service build"
         uses: actions/download-artifact@v4
         with:
           name: hotel-service-build
           path: ./hotel-service
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: "Download notification service build"
         uses: actions/download-artifact@v4
         with:
           name: notification-service-build
           path: ./notification-service
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: "Check downloaded files"
         run: |

@@ -1,64 +1,120 @@
 name: "Airbnb CI Pipeline / Workflow"
 
 on:
-    push:
-        branches:
-            - main
+  push:
+    branches:
+      - main
 
 jobs:
-    build-and-test:
-        runs-on: ubuntu-latest
-        steps:
-            - name: "Setup Node JS"
-              uses: actions/setup-node@v4
-              with:
-                node-version: "16"
+  build-and-test:
+    runs-on: ubuntu-latest
 
-            - name: "Check node version"
-              run: node --version
+    steps:
+      - name: "Setup Node JS"
+        uses: actions/setup-node@v4
+        with:
+          node-version: "16"
 
-            - name: "Clone the repository"
-              uses: actions/checkout@v2
+      - name: "Check Node version"
+        run: node --version
 
-            - name: "Install auth service dependencies"
-              working-directory: ./auth-service
-              run: npm install
+      - name: "Clone the repository"
+        uses: actions/checkout@v4
 
-            - name: "Install booking service dependencies"
-              working-directory: ./booking-service
-              run: npm install
+      # -------------------------
+      # Install dependencies
+      # -------------------------
 
-            - name: "Install frontend dependencies"
-              working-directory: ./frontend
-              run: npm install
+      - name: "Install auth service dependencies"
+        working-directory: ./auth-service
+        run: npm install
 
-            - name: "Install hotel service dependencies"
-              working-directory: ./hotel-service
-              run: npm install
+      - name: "Install booking service dependencies"
+        working-directory: ./booking-service
+        run: npm install
 
-            - name: "Install notification service dependencies"
-              working-directory: ./notification-service
-              run: npm install
+      - name: "Install frontend dependencies"
+        working-directory: ./frontend
+        run: npm install
 
-            - name: "List directories"
-              run: ls
+      - name: "Install hotel service dependencies"
+        working-directory: ./hotel-service
+        run: npm install
 
-            - name: "Run auth service build"
-              working-directory: ./auth-service
-              run: npm run build
+      - name: "Install notification service dependencies"
+        working-directory: ./notification-service
+        run: npm install
 
-            - name: "Run booking service build"
-              working-directory: ./booking-service
-              run: npm run build
+      # -------------------------
+      # Prisma
+      # -------------------------
 
-            - name: "Run frontend build"
-              working-directory: ./frontend
-              run: npm run build
+      - name: "Generate Auth Prisma Client"
+        working-directory: ./auth-service
+        run: npx prisma generate
+      
+      - name: "Generate Booking Prisma Client"
+        working-directory: ./booking-service
+        run: npx prisma generate
+      
+      - name: "Generate Hotel Prisma Client"
+        working-directory: ./hotel-service
+        run: npx prisma generate
 
-            - name: "Run hotel service build"
-              working-directory: ./hotel-service
-              run: npm run build
+      # -------------------------
+      # Build
+      # -------------------------
 
-            - name: "Run notification service build"
-              working-directory: ./notification-service
-              run: npm run build
+      - name: "Run auth service build"
+        working-directory: ./auth-service
+        run: npm run build
+
+      - name: "Run booking service build"
+        working-directory: ./booking-service
+        run: npm run build
+
+      - name: "Run frontend build"
+        working-directory: ./frontend
+        run: npm run build
+
+      - name: "Run hotel service build"
+        working-directory: ./hotel-service
+        run: npm run build
+
+      - name: "Run notification service build"
+        working-directory: ./notification-service
+        run: npm run build
+
+      # -------------------------
+      # Upload artifacts
+      # -------------------------
+
+      - name: "Upload auth service build"
+        uses: actions/upload-artifact@v4
+        with:
+          name: auth-service-build
+          path: auth-service/dist
+
+      - name: "Upload booking service build"
+        uses: actions/upload-artifact@v4
+        with:
+          name: booking-service-build
+          path: booking-service/dist
+
+      - name: "Upload frontend build"
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-build
+          path: frontend/dist
+
+      - name: "Upload hotel service build"
+        uses: actions/upload-artifact@v4
+        with:
+          name: hotel-service-build
+          path: hotel-service/dist
+
+      - name: "Upload notification service build"
+        uses: actions/upload-artifact@v4
+        with:
+          name: notification-service-build
+          path: notification-service/dist

@@ -42,3 +42,23 @@ jobs:
 
             - name: "List directories"
               run: ls
+
+            - name: "Run auth service build"
+              working-directory: ./auth-service
+              run: npm run build
+
+            - name: "Run booking service build"
+              working-directory: ./booking-service
+              run: npm run build
+
+            - name: "Run frontend build"
+              working-directory: ./frontend
+              run: npm run build
+
+            - name: "Run hotel service build"
+              working-directory: ./hotel-service
+              run: npm run build
+
+            - name: "Run notification service build"
+              working-directory: ./notification-service
+              run: npm run build

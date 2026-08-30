@@ -1,0 +1,158 @@
+========================================================================
+Airbnb / StayEase — Hotel Booking Platform
+Deployment Requirements (whole project)
+========================================================================
+
+IMPORTANT: This is a Node.js/TypeScript (backend) + Vite/React (frontend)
+monorepo. There is NO Python-style dependency file. Each service and the
+frontend declare their real dependencies in their own `package.json` /
+`package-lock.json`, installed with npm. This file documents WHAT is needed to
+build, configure, and DEPLOY the entire system.
+
+------------------------------------------------------------------------
+1. Components (5 deployables)
+------------------------------------------------------------------------
+  frontend              Vite + React + TS SPA (static build)         served as static files
+  auth-service          Express API gateway + auth/roles (JWT)       port 3008  (public entry)
+  hotel-service         Express hotels + room categories + rooms     port 3001
+  booking-service       Express bookings (Redis lock, BullMQ)        port 3000
+  notification-service  Email worker (Nodemailer + Handlebars)       port 3002
+
+Request flow: browser -> frontend -> auth-service (gateway, port 3008)
+The gateway proxies /api/v1/hotel -> hotel-service and /api/v1/booking ->
+booking-service. Hotel/booking enqueue jobs (BullMQ on Redis) consumed by
+notification-service, which sends email via SMTP.
+
+------------------------------------------------------------------------
+2. Infrastructure prerequisites (external services)
+------------------------------------------------------------------------
+  Node.js   >= 18 LTS   (18 or 20 recommended; backend needs >=18 because of
+                         bcrypt@6. Frontend also builds on 16, but use one
+                         Node >= 18 for the whole repo.)
+  npm       >= 8
+  MySQL     >= 8         Databases for auth-service, hotel-service,
+                         booking-service (each via Prisma DATABASE_URL).
+                         Use a separate schema/DB per service.
+  Redis     >= 6         Used by booking-service (Redlock + BullMQ),
+                         hotel-service (BullMQ, node-cron), and
+                         notification-service (BullMQ consumer).
+  SMTP host             For notification-service email (e.g. Gmail SMTP /
+                         SendGrid / SES). Needs MAIL_USER + MAIL_PASS.
+  Process manager       pm2 / systemd / Docker to keep the 4 Node services
+                         running. Frontend is static (no runtime).
+  Reverse proxy + TLS   Nginx/Caddy/ALB terminating HTTPS in production.
+
+------------------------------------------------------------------------
+3. Per-service dependencies (installed via npm — do not hand-manage)
+------------------------------------------------------------------------
+Exact versions are pinned in each service's package-lock.json.
+
+frontend (dependencies):
+  react ^18.3.1, react-dom ^18.3.1, react-router-dom ^6.30.6
+frontend (dev/build):
+  vite ^4.5.5, @vitejs/plugin-react ^4.3.4, typescript ^5.6.3,
+  tailwindcss ^3.4.17, postcss ^8.4.49, autoprefixer ^10.4.20, @types/*
+  (versions pinned for Node 16 compat — do NOT `npm audit fix --force`)
+
+auth-service:
+  express, cors, cookie-parser, jsonwebtoken, bcrypt, zod,
+  express-rate-limit, http-proxy-middleware, @prisma/client, dotenv
+  dev: typescript, ts-node, nodemon, prisma, @types/*
+
+hotel-service:
+  express, @prisma/client, ioredis, bullmq, node-cron, zod, dotenv
+  dev: typescript, ts-node, nodemon, prisma, @types/*
+
+booking-service:
+  express, @prisma/client, ioredis, redlock, bullmq, axios, zod, dotenv
+  dev: typescript, ts-node, nodemon, prisma
+
+notification-service:
+  express, ioredis, bullmq, nodemailer, handlebars, dotenv
+  dev: typescript, ts-node, nodemon, @types/*
+
+------------------------------------------------------------------------
+4. Environment variables (set per service; NEVER commit real secrets)
+------------------------------------------------------------------------
+auth-service/.env
+  PORT=3008
+  JWT_SECRET=<strong-random-secret>
+  DATABASE_URL=mysql://user:pass@host:3306/auth_db
+  BOOKING_SERVICE_URL=http://<booking-host>:3000
+  HOTEL_SERVICE_URL=http://<hotel-host>:3001
+  CORS_ORIGINS=https://<frontend-domain>     # comma-separated allow-list (prod)
+  NODE_ENV=production                          # makes the auth cookie Secure
+
+hotel-service/.env
+  PORT=3001
+  DATABASE_URL=mysql://user:pass@host:3306/hotel_db
+  REDIS_HOST=<redis-host>
+  REDIS_PORT=6379
+
+booking-service/.env
+  PORT=3000
+  DATABASE_URL=mysql://user:pass@host:3306/booking_db
+  REDIS_SERVER_URL=redis://<redis-host>:6379
+
+notification-service/.env
+  PORT=3002
+  REDIS_HOST=<redis-host>
+  REDIS_PORT=6379
+  MAIL_USER=<smtp-username / from-address>
+  MAIL_PASS=<smtp-app-password>
+
+frontend/.env  (BUILD-TIME — Vite inlines these at build)
+  VITE_AUTH_API_URL=https://api.<your-domain>/api/v1   # base URL of auth gateway
+  # AUTH_PROXY_TARGET is DEV-ONLY (vite dev proxy); not used in a prod build.
+
+------------------------------------------------------------------------
+5. Build & run — backend services (repeat for each of the 4)
+------------------------------------------------------------------------
+  cd <service>
+  npm ci                       # lockfile-exact install
+  npx prisma generate          # services with a prisma/ folder (auth, hotel, booking)
+  npx prisma migrate deploy    # apply migrations in production (auth, hotel, booking)
+  npm run build                # tsc -> dist/
+  npm run start                # node dist/index.js   (run under pm2/systemd)
+
+notification-service has no database (skip the prisma steps).
+
+------------------------------------------------------------------------
+6. Build & serve — frontend
+------------------------------------------------------------------------
+  cd frontend
+  npm ci
+  npm run build                # -> frontend/dist/  (static files)
+
+Serve frontend/dist/ from a static host / CDN. SPA FALLBACK REQUIRED:
+rewrite unknown paths to /index.html (client routes: /, /hotels, /bookings,
+/admin, /admin/hotels/:id/room-categories) or deep links/refreshes will 404.
+  Nginx:   location / { try_files $uri $uri/ /index.html; }
+  Netlify: /*  /index.html  200
+  Vercel:  { "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }] }
+
+------------------------------------------------------------------------
+7. Recommended deployment order
+------------------------------------------------------------------------
+  1) Provision MySQL, Redis, SMTP.
+  2) Deploy hotel-service, booking-service (run prisma migrate deploy).
+  3) Deploy notification-service (Redis + SMTP reachable).
+  4) Deploy auth-service (the gateway) with BOOKING_SERVICE_URL /
+     HOTEL_SERVICE_URL pointing at the above, and CORS_ORIGINS set.
+  5) Build the frontend with VITE_AUTH_API_URL pointing at the auth gateway,
+     then deploy the static dist/.
+
+------------------------------------------------------------------------
+8. Production notes (auth cookie / CORS)
+------------------------------------------------------------------------
+Auth is cookie-based (httpOnly `access_token`, sent with credentials on every
+request). Serve everything over HTTPS. Then:
+  - Same-origin setup (reverse proxy forwards /api to the gateway):
+      set VITE_AUTH_API_URL=/api/v1 — no CORS/SameSite changes needed.
+  - Cross-domain setup (frontend and API on different domains):
+      * auth-service must set the cookie with SameSite=None; Secure
+        (it currently sets Secure in prod; add SameSite=None for cross-site).
+      * set CORS_ORIGINS on auth-service to the frontend origin (credentials
+        are already enabled in code).
+Never run `npm audit fix --force` on the frontend (breaks Node-16 pins).
+========================================================================

@@ -39,3 +39,6 @@ jobs:
             - name: "Install notification service dependencies"
               working-directory: ./notification-service
               run: npm install
+
+            - name: "List directories"
+              run: ls

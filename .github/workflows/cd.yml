@@ -11,38 +11,14 @@ jobs:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
     runs-on: ubuntu-latest
+
     environment: production
 
-    # Needed to read artifacts from the triggering CI workflow run via the API.
     permissions:
       actions: read
       contents: read
 
     steps:
-      - name: "Setup nodejs"
-        uses: actions/setup-node@v4
-        with:
-          node-version: "16"
-
-      - name: "Setup vercel cli"
-        run: npm install -g vercel
-
-      - name: "Download auth service build"
-        uses: actions/download-artifact@v4
-        with:
-          name: auth-service-build
-          path: ./auth-service
-          run-id: ${{ github.event.workflow_run.id }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: "Download booking service build"
-        uses: actions/download-artifact@v4
-        with:
-          name: booking-service-build
-          path: ./booking-service
-          run-id: ${{ github.event.workflow_run.id }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-
       - name: "Download frontend build"
         uses: actions/download-artifact@v4
         with:
@@ -51,38 +27,22 @@ jobs:
           run-id: ${{ github.event.workflow_run.id }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: "Download hotel service build"
-        uses: actions/download-artifact@v4
-        with:
-          name: hotel-service-build
-          path: ./hotel-service
-          run-id: ${{ github.event.workflow_run.id }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: "Download notification service build"
-        uses: actions/download-artifact@v4
-        with:
-          name: notification-service-build
-          path: ./notification-service
-          run-id: ${{ github.event.workflow_run.id }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: "Check downloaded files"
+      - name: "Check frontend artifact"
         run: |
-          echo "Auth service:"
-          ls -la ./auth-service
-
-          echo "Booking service:"
-          ls -la ./booking-service
-
-          echo "Frontend:"
+          echo "Frontend artifact:"
           ls -la ./frontend
 
-          echo "Hotel service:"
-          ls -la ./hotel-service
+      - name: "Setup Node.js"
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
 
-          echo "Notification service:"
-          ls -la ./notification-service
+      - name: "Setup Vercel CLI"
+        run: npm install -g vercel
 
-      - name: "Deploy to vercel"
-        run: vercel --prod --token=${{ secrets.VERCEL_TOKEN }} --confirm --name=airbnb
+      - name: "Deploy frontend to Vercel"
+        working-directory: ./frontend
+        run: |
+          vercel --prod \
+            --token=${{ secrets.VERCEL_TOKEN }} \
+            --yes

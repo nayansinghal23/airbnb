@@ -11,6 +11,7 @@ jobs:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
     runs-on: ubuntu-latest
+    environment: production
 
     # Needed to read artifacts from the triggering CI workflow run via the API.
     permissions:
@@ -18,6 +19,14 @@ jobs:
       contents: read
 
     steps:
+      - name: "Setup nodejs"
+        uses: actions/setup-node@v4
+        with:
+          node-version: "16"
+
+      - name: "Setup vercel cli"
+        run: npm install -g vercel
+
       - name: "Download auth service build"
         uses: actions/download-artifact@v4
         with:
@@ -74,3 +83,6 @@ jobs:
 
           echo "Notification service:"
           ls -la ./notification-service
+
+      - name: "Deploy to vercel"
+        run: vercel --prod --token=${{ secrets.VERCEL_TOKEN }} --confirm --name=airbnb

@@ -1,0 +1,48 @@
+name: "CI CD Pipeline for Airbnb Frontend Preprod"
+
+on:
+    workflow_dispatch:
+
+jobs:
+    cicd:
+        runs-on: ubuntu-latest
+        environment: preprod
+
+        steps:
+            - name: "Setup Node JS"
+              uses: actions/setup-node@v4 
+              with:
+                node-version: '16'
+
+            - name: "Check node installation"
+              run: |
+                node --version
+                npm --version
+
+            - name: Checkout code
+              uses: actions/checkout@v2
+
+            - name: "Install dependencies"
+              run: npm install
+
+            - name: "Install vercel cli"
+              run: npm install -g vercel
+
+            - name: "List directory"
+              run: |
+                ls
+                echo ${{ vars.VITE_AUTH_API_URL }}
+
+            - name: "Create project Build"
+              run: |
+                echo VITE_AUTH_API_URL=$VITE_AUTH_API_URL >> .env
+                echo AUTH_PROXY_TARGET=$AUTH_PROXY_TARGET >> .env
+                npm run build
+              env:
+                VITE_AUTH_API_URL: ${{ vars.VITE_AUTH_API_URL }}
+                AUTH_PROXY_TARGET: ${{ vars.AUTH_PROXY_TARGET }}
+
+            - name: "Deploy to Vercel"
+              run: vercel --prod --token=${{ secrets.AIRBNB_PREPOD_VERCEL_TOKEN }} --confirm --name=airbnb_preprod
+
+            
